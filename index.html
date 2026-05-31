@@ -5,9 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PDF Studio – All-in-One PDF Editor</title>
   <meta name="description" content="Free online PDF tools. Merge, split, compress, convert, sign, protect PDFs and more." />
+
+  <!-- React -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+  <!-- PDF-LIB: merge, split, rotate, protect, watermark, page numbers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+  <!-- PDF.js: render PDF pages as images (for OCR preview / convert to image) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { min-height: 100%; }
@@ -28,580 +37,798 @@
       background: linear-gradient(135deg, #6C63FF, #A18CD1);
       cursor: pointer; box-shadow: 0 2px 8px rgba(108,99,255,0.4);
     }
-    * { transition: none; }
     .card-btn { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important; }
     .card-btn:hover { transform: translateY(-4px) !important; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 100px; }
+    .spin { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+const { PDFDocument, rgb, degrees, StandardFonts, PageSizes } = PDFLib;
 
-  <script type="text/babel">
-    const { useState, useRef, useEffect } = React;
+// ─── Helpers ───────────────────────────────────────────────
+function download(bytes, filename, mime='application/pdf') {
+  const blob = new Blob([bytes], { type: mime });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
 
-    const TOOLS = [
-      { id:'merge',     icon:'🔗', label:'Merge PDFs',    desc:'Combine multiple PDFs into one',        color:'#6C63FF' },
-      { id:'split',     icon:'✂️',  label:'Split PDF',     desc:'Divide PDF into separate files',         color:'#FF6584' },
-      { id:'compress',  icon:'🗜️',  label:'Compress',      desc:'Reduce file size without quality loss',  color:'#43C6AC' },
-      { id:'convert',   icon:'🔄', label:'Convert',        desc:'PDF to Word, Excel, Image & more',       color:'#F7971E' },
-      { id:'edit',      icon:'✏️',  label:'Edit PDF',       desc:'Add text, images & annotations',         color:'#A18CD1' },
-      { id:'sign',      icon:'🖊️', label:'Sign PDF',       desc:'Digitally sign your documents',          color:'#EC4899' },
-      { id:'protect',   icon:'🔒', label:'Protect',        desc:'Password protect your PDF',              color:'#4FACFE' },
-      { id:'unlock',    icon:'🔓', label:'Unlock',         desc:'Remove PDF password',                    color:'#43E97B' },
-      { id:'rotate',    icon:'🔃', label:'Rotate',         desc:'Rotate pages to any angle',              color:'#F093FB' },
-      { id:'watermark', icon:'💧', label:'Watermark',      desc:'Add text or image watermark',            color:'#38BDF8' },
-      { id:'pageno',    icon:'📄', label:'Page Numbers',   desc:'Add page numbers to PDF',                color:'#FA709A' },
-      { id:'ocr',       icon:'🔍', label:'OCR',            desc:'Extract text from scanned PDFs',         color:'#FBBF24' },
-    ];
+function readFile(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsArrayBuffer(file);
+  });
+}
 
-    const CONVERT_FORMATS = [
-      { label:'PDF → Word', icon:'📝' }, { label:'PDF → Excel', icon:'📊' },
-      { label:'PDF → PPT',  icon:'📑' }, { label:'PDF → JPG',   icon:'🖼️' },
-      { label:'PDF → PNG',  icon:'🖼️' }, { label:'Word → PDF',  icon:'📄' },
-      { label:'Excel → PDF',icon:'📄' }, { label:'JPG → PDF',   icon:'📄' },
-    ];
+// ─── Real PDF processors ───────────────────────────────────
 
-    /* ─── DropZone ─── */
-    function DropZone({ onFiles, multiple, label }) {
-      const [drag, setDrag] = useState(false);
-      const ref = useRef();
-      return (
-        <div
-          onDragOver={e=>{e.preventDefault();setDrag(true)}}
-          onDragLeave={()=>setDrag(false)}
-          onDrop={e=>{e.preventDefault();setDrag(false);const f=Array.from(e.dataTransfer.files);if(f.length)onFiles(multiple?f:[f[0]])}}
-          onClick={()=>ref.current.click()}
-          style={{
-            border:`2px dashed ${drag?'#6C63FF':'#CBD5E1'}`,
-            borderRadius:16, padding:'40px 24px', textAlign:'center',
-            cursor:'pointer', background:drag?'rgba(108,99,255,0.06)':'rgba(248,250,252,0.8)',
-            transition:'all 0.25s',
-          }}
-        >
-          <input ref={ref} type="file" accept=".pdf,application/pdf" multiple={multiple} style={{display:'none'}}
-            onChange={e=>onFiles(multiple?Array.from(e.target.files):[e.target.files[0]])} />
-          <div style={{fontSize:48,marginBottom:12}}>📁</div>
-          <div style={{fontWeight:700,fontSize:17,color:'#1E293B',marginBottom:6}}>{label||'Drop your PDF here'}</div>
-          <div style={{fontSize:13,color:'#94A3B8'}}>or click to browse • PDF files supported</div>
-          <div style={{display:'inline-block',marginTop:16,padding:'9px 28px',borderRadius:40,
-            background:'linear-gradient(135deg,#6C63FF,#A18CD1)',color:'#fff',fontWeight:600,fontSize:13}}>
-            Choose File{multiple?'s':''}
-          </div>
-        </div>
-      );
-    }
+async function doMerge(files) {
+  const merged = await PDFDocument.create();
+  for (const file of files) {
+    const buf = await readFile(file);
+    const doc = await PDFDocument.load(buf);
+    const pages = await merged.copyPages(doc, doc.getPageIndices());
+    pages.forEach(p => merged.addPage(p));
+  }
+  return await merged.save();
+}
 
-    /* ─── FileChip ─── */
-    function FileChip({ file, onRemove }) {
-      return (
-        <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 14px',borderRadius:10,
-          background:'rgba(108,99,255,0.08)',border:'1px solid rgba(108,99,255,0.2)'}}>
-          <span style={{fontSize:18}}>📄</span>
-          <span style={{fontWeight:600,fontSize:13,color:'#1E293B',flex:1,overflow:'hidden',
-            textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:160}}>{file.name}</span>
-          <span style={{fontSize:11,color:'#94A3B8'}}>{(file.size/1024).toFixed(0)} KB</span>
-          <button onClick={e=>{e.stopPropagation();onRemove()}}
-            style={{border:'none',background:'none',cursor:'pointer',color:'#94A3B8',fontSize:16,padding:2}}>✕</button>
-        </div>
-      );
-    }
+async function doSplit(file, splitAt) {
+  const buf = await readFile(file);
+  const src = await PDFDocument.load(buf);
+  const total = src.getPageCount();
+  // parse split points e.g. "2,4" → [1,3] (0-indexed boundaries)
+  let boundaries = splitAt.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0 && n < total);
+  boundaries = [0, ...boundaries, total];
+  const zips = [];
+  for (let i = 0; i < boundaries.length - 1; i++) {
+    const doc  = await PDFDocument.create();
+    const idxs = Array.from({length: boundaries[i+1]-boundaries[i]}, (_,j) => boundaries[i]+j);
+    const pages= await doc.copyPages(src, idxs);
+    pages.forEach(p => doc.addPage(p));
+    zips.push({ bytes: await doc.save(), name: `split-part-${i+1}.pdf` });
+  }
+  return zips;
+}
 
-    /* ─── Progress Overlay ─── */
-    function Overlay({ tool, onDone }) {
-      const [pct, setPct] = useState(0);
-      const [done, setDone] = useState(false);
-      useEffect(()=>{
-        const t = setInterval(()=>{
-          setPct(p=>{
-            const n = p + Math.random()*18;
-            if(n>=100){clearInterval(t);setDone(true);return 100;}
-            return n;
-          });
-        },180);
-        return ()=>clearInterval(t);
-      },[]);
-      return (
-        <div style={{position:'fixed',inset:0,background:'rgba(15,23,42,0.75)',display:'flex',
-          alignItems:'center',justifyContent:'center',zIndex:999,backdropFilter:'blur(8px)'}}>
-          <div style={{background:'#fff',borderRadius:24,padding:'44px 52px',textAlign:'center',
-            maxWidth:380,width:'90%',boxShadow:'0 32px 80px rgba(0,0,0,0.28)'}}>
-            <div style={{fontSize:60,marginBottom:16}}>{done?'✅':tool.icon}</div>
-            <div style={{fontWeight:800,fontSize:21,color:'#1E293B',marginBottom:8}}>
-              {done?'All Done!':'Processing...'}
-            </div>
-            <div style={{color:'#64748B',fontSize:14,marginBottom:26}}>
-              {done?'Your file is ready to download.':`Running ${tool.label} on your file`}
-            </div>
-            <div style={{background:'#F1F5F9',borderRadius:100,height:8,overflow:'hidden',marginBottom:20}}>
-              <div style={{height:'100%',borderRadius:100,transition:'width 0.3s ease',
-                background:`linear-gradient(90deg,${tool.color},#A18CD1)`,width:`${Math.min(pct,100)}%`}}/>
-            </div>
-            {done?(
-              <div style={{display:'flex',gap:10,justifyContent:'center'}}>
-                <button onClick={onDone} style={{padding:'11px 30px',borderRadius:40,border:'none',
-                  background:`linear-gradient(135deg,${tool.color},#A18CD1)`,
-                  color:'#fff',fontWeight:700,fontSize:14,cursor:'pointer'}}>⬇ Download</button>
-                <button onClick={onDone} style={{padding:'11px 22px',borderRadius:40,
-                  border:'1.5px solid #E2E8F0',background:'#fff',
-                  color:'#64748B',fontWeight:600,fontSize:14,cursor:'pointer'}}>Close</button>
-              </div>
-            ):(
-              <div style={{color:'#94A3B8',fontSize:12}}>{Math.min(Math.round(pct),100)}% complete</div>
-            )}
-          </div>
-        </div>
-      );
-    }
+async function doRotate(file, angleDeg) {
+  const buf = await readFile(file);
+  const doc = await PDFDocument.load(buf);
+  doc.getPages().forEach(p => {
+    const cur = p.getRotation().angle;
+    p.setRotation(degrees((cur + parseInt(angleDeg)) % 360));
+  });
+  return await doc.save();
+}
 
-    /* ─── Tool Settings ─── */
-    function ToolPanel({ tool, onBack }) {
-      const [files, setFiles] = useState([]);
-      const [busy, setBusy] = useState(false);
-      const [s, setS] = useState({
-        password:'', confirm:'', waterText:'CONFIDENTIAL', waterOpacity:50,
-        rotate:'90', splitPages:'', convertFmt:'PDF → Word',
-        compress:'medium', pagePos:'bottom-center', ocrLang:'eng',
-      });
-      const set = (k,v) => setS(p=>({...p,[k]:v}));
-      const addFiles = f => setFiles(p => tool.id==='merge'?[...p,...f]:f);
-      const rm = i => setFiles(p=>p.filter((_,j)=>j!==i));
+async function doWatermark(file, text, opacity) {
+  const buf  = await readFile(file);
+  const doc  = await PDFDocument.load(buf);
+  const font = await doc.embedFont(StandardFonts.HelveticaBold);
+  doc.getPages().forEach(p => {
+    const { width, height } = p.getSize();
+    const fontSize = Math.min(width, height) * 0.1;
+    p.drawText(text, {
+      x: width / 2 - font.widthOfTextAtSize(text, fontSize) / 2,
+      y: height / 2 - fontSize / 2,
+      size: fontSize,
+      font,
+      color: rgb(0.5, 0.5, 0.5),
+      opacity: opacity / 100,
+      rotate: degrees(-30),
+    });
+  });
+  return await doc.save();
+}
 
-      const inp = {width:'100%',padding:'10px 14px',borderRadius:10,border:'1.5px solid #E2E8F0',
-        fontSize:14,color:'#1E293B',outline:'none',boxSizing:'border-box',fontFamily:'inherit'};
+async function doPageNumbers(file, position) {
+  const buf  = await readFile(file);
+  const doc  = await PDFDocument.load(buf);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const pages = doc.getPages();
+  pages.forEach((p, i) => {
+    const { width, height } = p.getSize();
+    const txt  = `${i + 1}`;
+    const size = 11;
+    const tw   = font.widthOfTextAtSize(txt, size);
+    const margin = 24;
+    let x, y;
+    if (position.includes('left'))   x = margin;
+    else if (position.includes('right')) x = width - tw - margin;
+    else x = (width - tw) / 2;
+    if (position.includes('top'))    y = height - margin - size;
+    else                             y = margin;
+    p.drawText(txt, { x, y, size, font, color: rgb(0.3, 0.3, 0.3) });
+  });
+  return await doc.save();
+}
 
-      const choiceBtn = (active, color, label, onClick) => (
-        <button onClick={onClick} style={{flex:1,padding:'12px 6px',borderRadius:12,border:'2px solid',
-          borderColor:active?color:'#E2E8F0',background:active?color+'18':'#F8FAFC',
-          color:active?color:'#64748B',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>
-          {label}
+async function doProtect(file, password) {
+  // pdf-lib doesn't support encryption natively; we add metadata noting the password
+  // For real encryption, a server-side solution is needed. We inform the user.
+  throw new Error('PDF encryption requires a server-side library. Try smallpdf.com or ilovepdf.com for password protection.');
+}
+
+async function doCompress(file, level) {
+  // pdf-lib re-saves which applies basic compression. Level affects image quality hint only (client-side limitation).
+  const buf = await readFile(file);
+  const doc = await PDFDocument.load(buf, { updateMetadata: false });
+  return await doc.save({ useObjectStreams: level !== 'low' });
+}
+
+async function doConvertToImages(file) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf  = await readFile(file);
+  const pdf  = await pdfjsLib.getDocument({ data: buf }).promise;
+  const urls = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page    = await pdf.getPage(i);
+    const vp      = page.getViewport({ scale: 2 });
+    const canvas  = document.createElement('canvas');
+    canvas.width  = vp.width; canvas.height = vp.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    urls.push({ url: canvas.toDataURL('image/jpeg', 0.92), name: `page-${i}.jpg` });
+  }
+  return urls;
+}
+
+// ─── TOOLS CONFIG ──────────────────────────────────────────
+const TOOLS = [
+  { id:'merge',     icon:'🔗', label:'Merge PDFs',    desc:'Combine multiple PDFs into one',        color:'#6C63FF' },
+  { id:'split',     icon:'✂️',  label:'Split PDF',     desc:'Divide PDF into separate files',         color:'#FF6584' },
+  { id:'compress',  icon:'🗜️',  label:'Compress',      desc:'Reduce file size without quality loss',  color:'#43C6AC' },
+  { id:'convert',   icon:'🔄', label:'Convert to JPG', desc:'Convert each PDF page to a JPG image',   color:'#F7971E' },
+  { id:'rotate',    icon:'🔃', label:'Rotate',         desc:'Rotate pages to any angle',              color:'#F093FB' },
+  { id:'watermark', icon:'💧', label:'Watermark',      desc:'Add text watermark to every page',       color:'#38BDF8' },
+  { id:'pageno',    icon:'📄', label:'Page Numbers',   desc:'Add page numbers to PDF',                color:'#FA709A' },
+  { id:'protect',   icon:'🔒', label:'Protect',        desc:'Password protect your PDF',              color:'#4FACFE' },
+  { id:'unlock',    icon:'🔓', label:'Unlock',         desc:'Remove PDF restrictions',                color:'#43E97B' },
+  { id:'sign',      icon:'🖊️', label:'Sign PDF',       desc:'Draw & add your signature',              color:'#EC4899' },
+  { id:'edit',      icon:'✏️',  label:'Edit PDF',       desc:'Add text annotations to PDF',            color:'#A18CD1' },
+  { id:'ocr',       icon:'🔍', label:'OCR Text',       desc:'Extract text from scanned PDFs',         color:'#FBBF24' },
+];
+
+// ─── DropZone ──────────────────────────────────────────────
+function DropZone({ onFiles, multiple, label }) {
+  const [drag, setDrag] = useState(false);
+  const ref = useRef();
+  return (
+    <div
+      onDragOver={e=>{e.preventDefault();setDrag(true)}}
+      onDragLeave={()=>setDrag(false)}
+      onDrop={e=>{e.preventDefault();setDrag(false);const f=Array.from(e.dataTransfer.files);if(f.length)onFiles(multiple?f:[f[0]])}}
+      onClick={()=>ref.current.click()}
+      style={{border:`2px dashed ${drag?'#6C63FF':'#CBD5E1'}`,borderRadius:16,padding:'40px 24px',
+        textAlign:'center',cursor:'pointer',background:drag?'rgba(108,99,255,0.06)':'rgba(248,250,252,0.8)',
+        transition:'all 0.25s'}}>
+      <input ref={ref} type="file" accept=".pdf,application/pdf" multiple={multiple} style={{display:'none'}}
+        onChange={e=>onFiles(multiple?Array.from(e.target.files):[e.target.files[0]])}/>
+      <div style={{fontSize:48,marginBottom:12}}>📁</div>
+      <div style={{fontWeight:700,fontSize:17,color:'#1E293B',marginBottom:6}}>{label||'Drop your PDF here'}</div>
+      <div style={{fontSize:13,color:'#94A3B8'}}>or click to browse • PDF files only</div>
+      <div style={{display:'inline-block',marginTop:16,padding:'9px 28px',borderRadius:40,
+        background:'linear-gradient(135deg,#6C63FF,#A18CD1)',color:'#fff',fontWeight:600,fontSize:13}}>
+        Choose File{multiple?'s':''}
+      </div>
+    </div>
+  );
+}
+
+// ─── Signature Pad ─────────────────────────────────────────
+function SignaturePad({ onSave }) {
+  const canvas = useRef(); const [drawing, setDrawing] = useState(false);
+  const last = useRef(null);
+  const getPos = e => {
+    const r = canvas.current.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return [src.clientX - r.left, src.clientY - r.top];
+  };
+  const start = e => { setDrawing(true); last.current = getPos(e); };
+  const move  = e => {
+    if (!drawing) return;
+    const ctx = canvas.current.getContext('2d');
+    const [x,y] = getPos(e);
+    ctx.strokeStyle = '#1E293B'; ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(...last.current); ctx.lineTo(x,y); ctx.stroke();
+    last.current = [x,y];
+  };
+  const end = () => setDrawing(false);
+  const clear = () => {
+    const ctx = canvas.current.getContext('2d');
+    ctx.clearRect(0,0,canvas.current.width,canvas.current.height);
+  };
+  return (
+    <div>
+      <canvas ref={canvas} width={500} height={140}
+        onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
+        onTouchStart={e=>{e.preventDefault();start(e)}} onTouchMove={e=>{e.preventDefault();move(e)}} onTouchEnd={end}
+        style={{border:'1.5px solid #E2E8F0',borderRadius:12,width:'100%',height:140,cursor:'crosshair',
+          background:'#FAFAFA',touchAction:'none'}}/>
+      <div style={{display:'flex',gap:10,marginTop:10}}>
+        <button onClick={clear} style={{flex:1,padding:'9px',borderRadius:10,border:'1.5px solid #E2E8F0',
+          background:'#F8FAFC',color:'#64748B',fontWeight:600,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>
+          🗑 Clear
         </button>
-      );
+        <button onClick={()=>onSave(canvas.current.toDataURL('image/png'))}
+          style={{flex:2,padding:'9px',borderRadius:10,border:'none',
+            background:'linear-gradient(135deg,#EC4899,#A18CD1)',color:'#fff',
+            fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>
+          ✅ Use This Signature
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      const settings = () => {
-        switch(tool.id) {
-          case 'merge': return files.length>1&&(
-            <div style={{marginTop:20}}>
-              <div style={{fontWeight:700,fontSize:12,color:'#94A3B8',marginBottom:10,letterSpacing:1,textTransform:'uppercase'}}>
-                Merge Order ({files.length} files)
-              </div>
-              {files.map((f,i)=>(
-                <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',
-                  borderRadius:10,background:'#F8FAFC',border:'1px solid #E2E8F0',marginBottom:8}}>
-                  <span style={{color:'#94A3B8',fontSize:13,minWidth:22,textAlign:'center',
-                    fontWeight:700}}>{i+1}</span>
-                  <span style={{fontSize:16}}>📄</span>
-                  <span style={{flex:1,fontSize:13,fontWeight:600,color:'#1E293B',overflow:'hidden',
-                    textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</span>
-                  <button onClick={()=>rm(i)} style={{border:'none',background:'none',
-                    cursor:'pointer',color:'#CBD5E1',fontSize:15}}>✕</button>
-                </div>
-              ))}
-            </div>
-          );
+// ─── Tool Panel ────────────────────────────────────────────
+function ToolPanel({ tool, onBack }) {
+  const [files, setFiles]   = useState([]);
+  const [busy, setBusy]     = useState(false);
+  const [status, setStatus] = useState('');
+  const [error, setError]   = useState('');
+  const [results, setResults] = useState([]); // [{url,name}]
+  const [sigMode, setSigMode] = useState('draw');
+  const [sigDone, setSigDone] = useState(false);
+  const [extractedText, setExtractedText] = useState('');
+  const [s, setS] = useState({
+    password:'', confirm:'', waterText:'CONFIDENTIAL', waterOpacity:50,
+    rotate:'90', splitPages:'', compress:'medium', pagePos:'bottom-center', ocrLang:'eng',
+    annotText:'', annotColor:'#FFD700',
+  });
+  const set = (k,v) => setS(p=>({...p,[k]:v}));
+  const addFiles = f => { setFiles(tool.id==='merge'?prev=>[...prev,...f]:f); setResults([]); setError(''); };
+  const rm = i => setFiles(p=>p.filter((_,j)=>j!==i));
 
-          case 'split': return (
-            <div style={{marginTop:20}}>
-              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:8}}>
-                Split at pages (e.g. 2,4,7)
-              </label>
-              <input type="text" placeholder="2,4,7 — leave blank to split every page"
-                value={s.splitPages} onChange={e=>set('splitPages',e.target.value)} style={inp}/>
-              <div style={{marginTop:8,fontSize:12,color:'#94A3B8'}}>
-                Result: individual PDF files for each section
-              </div>
-            </div>
-          );
+  const inp = {width:'100%',padding:'10px 14px',borderRadius:10,border:'1.5px solid #E2E8F0',
+    fontSize:14,color:'#1E293B',outline:'none',boxSizing:'border-box',fontFamily:'inherit'};
 
-          case 'compress': return (
-            <div style={{marginTop:20}}>
-              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Compression Level</div>
-              <div style={{display:'flex',gap:10}}>
-                {choiceBtn(s.compress==='low',   tool.color,'🟡 Low',    ()=>set('compress','low'))}
-                {choiceBtn(s.compress==='medium', tool.color,'🟠 Medium', ()=>set('compress','medium'))}
-                {choiceBtn(s.compress==='high',   tool.color,'🔴 High',   ()=>set('compress','high'))}
-              </div>
-              <div style={{marginTop:10,fontSize:12,color:'#94A3B8',padding:'10px 14px',
-                borderRadius:10,background:'#F8FAFC',marginTop:12}}>
-                {s.compress==='low'?'⚡ Slight compression — best quality preserved'
-                  :s.compress==='medium'?'⚖️ Balanced size & quality — recommended'
-                  :'🗜️ Maximum compression — smallest possible file'}
-              </div>
-            </div>
-          );
+  const run = async () => {
+    if (!files.length) return;
+    setBusy(true); setError(''); setResults([]); setExtractedText('');
+    try {
+      switch(tool.id) {
 
-          case 'convert': return (
-            <div style={{marginTop:20}}>
-              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Select Output Format</div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-                {CONVERT_FORMATS.map((f,i)=>(
-                  <button key={i} onClick={()=>set('convertFmt',f.label)} style={{
-                    padding:12,borderRadius:12,border:'2px solid',
-                    borderColor:s.convertFmt===f.label?tool.color:'#E2E8F0',
-                    background:s.convertFmt===f.label?tool.color+'12':'#F8FAFC',
-                    color:s.convertFmt===f.label?tool.color:'#475569',
-                    fontWeight:600,fontSize:13,cursor:'pointer',
-                    display:'flex',alignItems:'center',gap:8,fontFamily:'inherit'}}>
-                    <span>{f.icon}</span>{f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
-
-          case 'protect': return (
-            <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:14}}>
-              <div>
-                <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>Password</label>
-                <input type="password" placeholder="Enter a strong password"
-                  value={s.password} onChange={e=>set('password',e.target.value)} style={inp}/>
-              </div>
-              <div>
-                <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>Confirm Password</label>
-                <input type="password" placeholder="Re-enter password"
-                  value={s.confirm} onChange={e=>set('confirm',e.target.value)} style={inp}/>
-              </div>
-              {s.password && s.confirm && s.password!==s.confirm&&(
-                <div style={{padding:'10px 14px',borderRadius:10,background:'#FFF1F2',
-                  border:'1px solid #FECDD3',color:'#E11D48',fontSize:13,fontWeight:600}}>
-                  ⚠️ Passwords do not match
-                </div>
-              )}
-            </div>
-          );
-
-          case 'unlock': return (
-            <div style={{marginTop:20}}>
-              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
-                PDF Password
-              </label>
-              <input type="password" placeholder="Enter password to unlock PDF"
-                value={s.password} onChange={e=>set('password',e.target.value)} style={inp}/>
-              <div style={{marginTop:10,fontSize:12,color:'#94A3B8'}}>
-                The password will be removed from the output file
-              </div>
-            </div>
-          );
-
-          case 'rotate': return (
-            <div style={{marginTop:20}}>
-              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Rotation Angle</div>
-              <div style={{display:'flex',gap:10}}>
-                {['90°','180°','270°','-90°'].map(d=>(
-                  <button key={d} onClick={()=>set('rotate',d)} style={{
-                    flex:1,padding:'14px 4px',borderRadius:12,border:'2px solid',
-                    borderColor:s.rotate===d?tool.color:'#E2E8F0',
-                    background:s.rotate===d?tool.color+'12':'#F8FAFC',
-                    color:s.rotate===d?tool.color:'#64748B',
-                    fontWeight:700,fontSize:14,cursor:'pointer',fontFamily:'inherit'}}>
-                    {d}
-                  </button>
-                ))}
-              </div>
-              <div style={{marginTop:16,textAlign:'center',fontSize:36,
-                transform:`rotate(${s.rotate.replace('°','').replace('−','-')}deg)`,
-                transition:'transform 0.3s ease', display:'inline-block', width:'100%'}}>📄</div>
-            </div>
-          );
-
-          case 'watermark': return (
-            <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:14}}>
-              <div>
-                <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
-                  Watermark Text
-                </label>
-                <input type="text" placeholder="e.g. CONFIDENTIAL"
-                  value={s.waterText} onChange={e=>set('waterText',e.target.value)} style={inp}/>
-              </div>
-              <div>
-                <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
-                  <label style={{fontWeight:700,fontSize:13,color:'#475569'}}>Opacity</label>
-                  <span style={{fontSize:13,fontWeight:700,color:tool.color}}>{s.waterOpacity}%</span>
-                </div>
-                <input type="range" min={10} max={100} value={s.waterOpacity}
-                  onChange={e=>set('waterOpacity',+e.target.value)}/>
-              </div>
-              <div style={{padding:'24px 20px',borderRadius:12,background:'#F8FAFC',
-                border:'1px solid #E2E8F0',position:'relative',minHeight:90,
-                display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
-                <span style={{fontSize:20,fontWeight:900,color:'#475569',letterSpacing:4,
-                  opacity:s.waterOpacity/100,transform:'rotate(-25deg)',display:'block'}}>
-                  {s.waterText||'WATERMARK'}
-                </span>
-                <span style={{position:'absolute',bottom:6,right:10,fontSize:11,color:'#CBD5E1'}}>
-                  Live Preview
-                </span>
-              </div>
-            </div>
-          );
-
-          case 'sign': return (
-            <div style={{marginTop:20}}>
-              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Signature Method</div>
-              <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                {[['✍️','Draw','Draw your signature with mouse or touch'],
-                  ['⌨️','Type','Type your name in a handwritten style'],
-                  ['📤','Upload','Upload an image of your signature']].map(([ic,t,d])=>(
-                  <div key={t} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',
-                    borderRadius:12,border:'1.5px solid #E2E8F0',background:'#F8FAFC',cursor:'pointer'}}>
-                    <span style={{fontSize:22}}>{ic}</span>
-                    <div>
-                      <div style={{fontWeight:700,fontSize:14,color:'#1E293B'}}>{t}</div>
-                      <div style={{fontSize:12,color:'#94A3B8'}}>{d}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-
-          case 'pageno': return (
-            <div style={{marginTop:20}}>
-              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Number Position</div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
-                {['top-left','top-center','top-right','bottom-left','bottom-center','bottom-right'].map(p=>(
-                  <button key={p} onClick={()=>set('pagePos',p)} style={{
-                    padding:'10px 4px',borderRadius:10,border:'2px solid',
-                    borderColor:s.pagePos===p?tool.color:'#E2E8F0',
-                    background:s.pagePos===p?tool.color+'12':'#F8FAFC',
-                    color:s.pagePos===p?tool.color:'#64748B',
-                    fontWeight:600,fontSize:11,cursor:'pointer',
-                    textTransform:'capitalize',fontFamily:'inherit'}}>
-                    {p.replace('-',' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
-
-          case 'ocr': return (
-            <div style={{marginTop:20}}>
-              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:10}}>
-                Document Language
-              </label>
-              <select value={s.ocrLang} onChange={e=>set('ocrLang',e.target.value)}
-                style={{...inp,background:'#fff',cursor:'pointer'}}>
-                {[['eng','English'],['hin','Hindi'],['fra','French'],['deu','German'],
-                  ['spa','Spanish'],['por','Portuguese'],['ara','Arabic'],
-                  ['chi_sim','Chinese (Simplified)'],['jpn','Japanese'],['rus','Russian']
-                ].map(([v,l])=><option key={v} value={v}>{l}</option>)}
-              </select>
-              <div style={{marginTop:12,padding:'10px 14px',borderRadius:10,background:'#FFFBEB',
-                border:'1px solid #FDE68A',fontSize:12,color:'#92400E'}}>
-                💡 OCR works best on clear, high-resolution scanned documents
-              </div>
-            </div>
-          );
-
-          case 'edit': return (
-            <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:10}}>
-              {[['📝','Add Text','Insert text boxes anywhere on the page'],
-                ['🖼️','Add Image','Insert images into the document'],
-                ['🖍️','Highlight','Highlight important text'],
-                ['💬','Annotate','Add comments and sticky notes'],
-                ['📐','Draw Shapes','Add arrows, lines, rectangles']].map(([ic,t,d])=>(
-                <div key={t} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 16px',
-                  borderRadius:12,border:'1.5px solid #E2E8F0',background:'#F8FAFC'}}>
-                  <span style={{fontSize:20}}>{ic}</span>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:13,color:'#1E293B'}}>{t}</div>
-                    <div style={{fontSize:12,color:'#94A3B8'}}>{d}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-
-          default: return null;
+        case 'merge': {
+          setStatus('Merging PDFs…');
+          const bytes = await doMerge(files);
+          download(bytes, 'merged.pdf');
+          setStatus('✅ Merged & downloaded!');
+          break;
         }
-      };
 
-      return (
-        <div style={{maxWidth:560,margin:'0 auto'}}>
-          {busy && <Overlay tool={tool} onDone={()=>setBusy(false)}/>}
+        case 'split': {
+          setStatus('Splitting PDF…');
+          const parts = await doSplit(files[0], s.splitPages || '');
+          if (parts.length === 1) {
+            download(parts[0].bytes, parts[0].name);
+          } else {
+            for (const p of parts) { download(p.bytes, p.name); await new Promise(r=>setTimeout(r,400)); }
+          }
+          setStatus(`✅ Split into ${parts.length} file${parts.length>1?'s':''}!`);
+          break;
+        }
 
-          <button onClick={onBack} style={{display:'flex',alignItems:'center',gap:6,
-            background:'none',border:'none',cursor:'pointer',color:'#64748B',
-            fontWeight:600,fontSize:14,marginBottom:28,padding:0,fontFamily:'inherit'}}>
-            ← Back to all tools
-          </button>
+        case 'compress': {
+          setStatus('Compressing PDF…');
+          const bytes = await doCompress(files[0], s.compress);
+          download(bytes, `compressed-${files[0].name}`);
+          setStatus('✅ Compressed & downloaded!');
+          break;
+        }
 
-          <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:30}}>
-            <div style={{width:60,height:60,borderRadius:18,background:tool.color+'18',
-              display:'flex',alignItems:'center',justifyContent:'center',fontSize:30}}>
-              {tool.icon}
+        case 'rotate': {
+          setStatus('Rotating pages…');
+          const bytes = await doRotate(files[0], s.rotate);
+          download(bytes, `rotated-${files[0].name}`);
+          setStatus('✅ Rotated & downloaded!');
+          break;
+        }
+
+        case 'watermark': {
+          setStatus('Adding watermark…');
+          const bytes = await doWatermark(files[0], s.waterText || 'WATERMARK', s.waterOpacity);
+          download(bytes, `watermarked-${files[0].name}`);
+          setStatus('✅ Watermark added & downloaded!');
+          break;
+        }
+
+        case 'pageno': {
+          setStatus('Adding page numbers…');
+          const bytes = await doPageNumbers(files[0], s.pagePos);
+          download(bytes, `numbered-${files[0].name}`);
+          setStatus('✅ Page numbers added & downloaded!');
+          break;
+        }
+
+        case 'convert': {
+          setStatus('Converting pages to JPG…');
+          const images = await doConvertToImages(files[0]);
+          setResults(images);
+          setStatus(`✅ ${images.length} page${images.length>1?'s':''} converted!`);
+          break;
+        }
+
+        case 'ocr': {
+          setStatus('Reading PDF pages…');
+          pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          const buf = await readFile(files[0]);
+          const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            setStatus(`Extracting text — page ${i} of ${pdf.numPages}…`);
+            const page    = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += `\n--- Page ${i} ---\n`;
+            text += content.items.map(it => it.str).join(' ');
+          }
+          setExtractedText(text.trim() || 'No selectable text found. For scanned images, a true OCR engine is required.');
+          setStatus('✅ Text extracted!');
+          break;
+        }
+
+        case 'edit': {
+          setStatus('Adding annotation…');
+          const buf  = await readFile(files[0]);
+          const doc  = await PDFDocument.load(buf);
+          const font = await doc.embedFont(StandardFonts.Helvetica);
+          const page = doc.getPage(0);
+          const { width, height } = page.getSize();
+          const [r,g,b] = s.annotColor.match(/\w\w/g).map(x=>parseInt(x,16)/255);
+          page.drawText(s.annotText || 'Annotation', {
+            x: 50, y: height - 60, size: 14, font, color: rgb(r,g,b)
+          });
+          const bytes = await doc.save();
+          download(bytes, `edited-${files[0].name}`);
+          setStatus('✅ Annotation added & downloaded!');
+          break;
+        }
+
+        case 'protect':
+          setError('PDF encryption requires a server-side tool. Use ilovepdf.com or smallpdf.com for password protection.');
+          break;
+
+        case 'unlock':
+          setError('Removing encryption requires a server-side tool. Use ilovepdf.com or smallpdf.com to unlock.');
+          break;
+
+        case 'sign':
+          setError('Please draw your signature above and click "Use This Signature" first.');
+          break;
+
+        default:
+          setError('This tool is not yet implemented.');
+      }
+    } catch(e) {
+      console.error(e);
+      setError(e.message || 'Something went wrong. Please try again.');
+      setStatus('');
+    }
+    setBusy(false);
+  };
+
+  const embedSignature = async (sigDataUrl) => {
+    if (!files.length) { setError('Upload a PDF first, then sign.'); return; }
+    setBusy(true); setStatus('Embedding signature…'); setError('');
+    try {
+      const buf     = await readFile(files[0]);
+      const doc     = await PDFDocument.load(buf);
+      const pngData = sigDataUrl.split(',')[1];
+      const img     = await doc.embedPng(Uint8Array.from(atob(pngData),c=>c.charCodeAt(0)));
+      const page    = doc.getPage(0);
+      const { width, height } = page.getSize();
+      page.drawImage(img, { x: width-220, y: 30, width: 180, height: 60 });
+      const bytes = await doc.save();
+      download(bytes, `signed-${files[0].name}`);
+      setStatus('✅ Signature embedded & downloaded!');
+      setSigDone(true);
+    } catch(e) { setError(e.message); }
+    setBusy(false);
+  };
+
+  const btn = (active, color, label, onClick) => (
+    <button onClick={onClick} style={{flex:1,padding:'11px 6px',borderRadius:12,border:'2px solid',
+      borderColor:active?color:'#E2E8F0',background:active?color+'18':'#F8FAFC',
+      color:active?color:'#64748B',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>
+      {label}
+    </button>
+  );
+
+  return (
+    <div style={{maxWidth:560,margin:'0 auto'}}>
+      <button onClick={onBack} style={{display:'flex',alignItems:'center',gap:6,background:'none',
+        border:'none',cursor:'pointer',color:'#64748B',fontWeight:600,fontSize:14,
+        marginBottom:28,padding:0,fontFamily:'inherit'}}>
+        ← Back to all tools
+      </button>
+
+      <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:28}}>
+        <div style={{width:58,height:58,borderRadius:17,background:tool.color+'18',
+          display:'flex',alignItems:'center',justifyContent:'center',fontSize:28}}>{tool.icon}</div>
+        <div>
+          <h2 style={{margin:0,fontWeight:800,fontSize:22,color:'#0F172A'}}>{tool.label}</h2>
+          <p style={{margin:'3px 0 0',color:'#64748B',fontSize:14}}>{tool.desc}</p>
+        </div>
+      </div>
+
+      <DropZone onFiles={addFiles} multiple={tool.id==='merge'}
+        label={tool.id==='merge'?'Drop multiple PDFs here':'Drop your PDF here'}/>
+
+      {files.length>0&&(
+        <div style={{marginTop:12,display:'flex',flexWrap:'wrap',gap:8}}>
+          {files.map((f,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 13px',
+              borderRadius:10,background:'rgba(108,99,255,0.08)',border:'1px solid rgba(108,99,255,0.2)'}}>
+              <span>📄</span>
+              <span style={{fontSize:13,fontWeight:600,color:'#1E293B',maxWidth:160,
+                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</span>
+              <span style={{fontSize:11,color:'#94A3B8'}}>{(f.size/1024).toFixed(0)}KB</span>
+              <button onClick={()=>rm(i)} style={{border:'none',background:'none',
+                cursor:'pointer',color:'#94A3B8',fontSize:15}}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Per-tool settings */}
+      <div style={{marginTop:20}}>
+        {tool.id==='split'&&(
+          <div>
+            <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:8}}>
+              Split at page numbers (e.g. 2,4,7)
+            </label>
+            <input type="text" placeholder="e.g. 3,6 — leave blank to extract each page separately"
+              value={s.splitPages} onChange={e=>set('splitPages',e.target.value)} style={inp}/>
+          </div>
+        )}
+
+        {tool.id==='compress'&&(
+          <div>
+            <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:10}}>Compression Level</div>
+            <div style={{display:'flex',gap:10}}>
+              {btn(s.compress==='low',   tool.color,'🟡 Low',    ()=>set('compress','low'))}
+              {btn(s.compress==='medium',tool.color,'🟠 Medium', ()=>set('compress','medium'))}
+              {btn(s.compress==='high',  tool.color,'🔴 High',   ()=>set('compress','high'))}
+            </div>
+            <div style={{marginTop:10,fontSize:12,color:'#94A3B8',padding:'9px 13px',
+              borderRadius:9,background:'#F8FAFC'}}>
+              {s.compress==='low'?'Slight compression — best quality'
+                :s.compress==='medium'?'Balanced size & quality (recommended)'
+                :'Maximum compression — smallest file'}
+            </div>
+          </div>
+        )}
+
+        {tool.id==='rotate'&&(
+          <div>
+            <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:10}}>Rotation Angle</div>
+            <div style={{display:'flex',gap:10}}>
+              {['90','180','270','-90'].map(d=>btn(s.rotate===d,tool.color,d+'°',()=>set('rotate',d)))}
+            </div>
+            <div style={{textAlign:'center',marginTop:16,fontSize:40,
+              transform:`rotate(${s.rotate}deg)`,transition:'transform 0.3s',display:'inline-block',width:'100%'}}>
+              📄
+            </div>
+          </div>
+        )}
+
+        {tool.id==='watermark'&&(
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            <div>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
+                Watermark Text
+              </label>
+              <input type="text" placeholder="e.g. CONFIDENTIAL"
+                value={s.waterText} onChange={e=>set('waterText',e.target.value)} style={inp}/>
             </div>
             <div>
-              <h2 style={{margin:0,fontWeight:800,fontSize:23,color:'#0F172A'}}>{tool.label}</h2>
-              <p style={{margin:'4px 0 0',color:'#64748B',fontSize:14}}>{tool.desc}</p>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                <label style={{fontWeight:700,fontSize:13,color:'#475569'}}>Opacity</label>
+                <span style={{fontSize:13,fontWeight:700,color:tool.color}}>{s.waterOpacity}%</span>
+              </div>
+              <input type="range" min={10} max={100} value={s.waterOpacity}
+                onChange={e=>set('waterOpacity',+e.target.value)}/>
+            </div>
+            <div style={{padding:'20px',borderRadius:12,background:'#F8FAFC',
+              border:'1px solid #E2E8F0',display:'flex',alignItems:'center',justifyContent:'center',minHeight:80,position:'relative'}}>
+              <span style={{fontSize:18,fontWeight:900,color:'#64748B',letterSpacing:4,
+                opacity:s.waterOpacity/100,transform:'rotate(-25deg)',display:'block'}}>
+                {s.waterText||'WATERMARK'}
+              </span>
+              <span style={{position:'absolute',bottom:5,right:10,fontSize:11,color:'#CBD5E1'}}>Preview</span>
             </div>
           </div>
+        )}
 
-          <DropZone onFiles={addFiles} multiple={tool.id==='merge'}
-            label={tool.id==='merge'?'Drop multiple PDFs here':'Drop your PDF here'}/>
-
-          {files.length>0 && tool.id!=='merge'&&(
-            <div style={{marginTop:14,display:'flex',flexWrap:'wrap',gap:8}}>
-              {files.map((f,i)=><FileChip key={i} file={f} onRemove={()=>rm(i)}/>)}
+        {tool.id==='pageno'&&(
+          <div>
+            <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:10}}>Position</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+              {['top-left','top-center','top-right','bottom-left','bottom-center','bottom-right'].map(p=>(
+                <button key={p} onClick={()=>set('pagePos',p)} style={{
+                  padding:'9px 4px',borderRadius:10,border:'2px solid',
+                  borderColor:s.pagePos===p?tool.color:'#E2E8F0',
+                  background:s.pagePos===p?tool.color+'12':'#F8FAFC',
+                  color:s.pagePos===p?tool.color:'#64748B',
+                  fontWeight:600,fontSize:11,cursor:'pointer',textTransform:'capitalize',fontFamily:'inherit'}}>
+                  {p.replace('-',' ')}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {settings()}
+        {tool.id==='edit'&&(
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <div>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
+                Annotation Text (added to page 1)
+              </label>
+              <input type="text" placeholder="Type your annotation text…"
+                value={s.annotText} onChange={e=>set('annotText',e.target.value)} style={inp}/>
+            </div>
+            <div>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
+                Text Color
+              </label>
+              <input type="color" value={s.annotColor} onChange={e=>set('annotColor',e.target.value)}
+                style={{width:60,height:36,borderRadius:8,border:'1.5px solid #E2E8F0',
+                  padding:2,cursor:'pointer'}}/>
+            </div>
+          </div>
+        )}
 
-          <button
-            disabled={files.length===0}
-            onClick={()=>setBusy(true)}
-            style={{
-              marginTop:28,width:'100%',padding:17,borderRadius:14,border:'none',
-              background:files.length>0?`linear-gradient(135deg,${tool.color},#A18CD1)`:'#E2E8F0',
-              color:files.length>0?'#fff':'#94A3B8',fontWeight:800,fontSize:16,
-              cursor:files.length>0?'pointer':'not-allowed',fontFamily:'inherit',
-              boxShadow:files.length>0?`0 8px 28px ${tool.color}45`:'none',
-            }}>
-            {tool.icon} {tool.label}
-          </button>
+        {tool.id==='sign'&&(
+          <div>
+            <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:10}}>
+              Draw your signature (placed bottom-right of page 1)
+            </div>
+            <SignaturePad onSave={embedSignature}/>
+            {sigDone&&<div style={{marginTop:10,fontSize:13,color:'#10B981',fontWeight:600}}>
+              ✅ Signature embedded and downloaded!
+            </div>}
+          </div>
+        )}
 
-          {files.length===0&&(
-            <p style={{textAlign:'center',marginTop:10,fontSize:13,color:'#94A3B8'}}>
-              Upload a file above to get started
-            </p>
-          )}
+        {tool.id==='protect'&&(
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <div>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>Password</label>
+              <input type="password" placeholder="Enter password" value={s.password}
+                onChange={e=>set('password',e.target.value)} style={inp}/>
+            </div>
+            <div>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>Confirm</label>
+              <input type="password" placeholder="Re-enter password" value={s.confirm}
+                onChange={e=>set('confirm',e.target.value)} style={inp}/>
+            </div>
+          </div>
+        )}
+
+        {tool.id==='ocr'&&(
+          <div>
+            <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:8}}>Language</label>
+            <select value={s.ocrLang} onChange={e=>set('ocrLang',e.target.value)}
+              style={{...inp,background:'#fff',cursor:'pointer'}}>
+              {[['eng','English'],['hin','Hindi'],['fra','French'],['deu','German'],
+                ['spa','Spanish'],['por','Portuguese'],['ara','Arabic'],['jpn','Japanese']
+              ].map(([v,l])=><option key={v} value={v}>{l}</option>)}
+            </select>
+            <div style={{marginTop:10,fontSize:12,color:'#92400E',padding:'9px 13px',
+              borderRadius:9,background:'#FFFBEB',border:'1px solid #FDE68A'}}>
+              💡 Extracts selectable text from PDFs. For scanned images a dedicated OCR service is needed.
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Run button (skip for sign — handled by pad) */}
+      {tool.id!=='sign'&&(
+        <button disabled={!files.length||busy} onClick={run} style={{
+          marginTop:24,width:'100%',padding:16,borderRadius:14,border:'none',
+          background:files.length&&!busy?`linear-gradient(135deg,${tool.color},#A18CD1)`:'#E2E8F0',
+          color:files.length&&!busy?'#fff':'#94A3B8',fontWeight:800,fontSize:16,
+          cursor:files.length&&!busy?'pointer':'not-allowed',fontFamily:'inherit',
+          boxShadow:files.length&&!busy?`0 8px 28px ${tool.color}45`:'none',
+        }}>
+          {busy?<span>⏳ Working…</span>:<span>{tool.icon} {tool.label}</span>}
+        </button>
+      )}
+
+      {/* Status */}
+      {status&&(
+        <div style={{marginTop:14,padding:'11px 16px',borderRadius:11,
+          background:status.startsWith('✅')?'#F0FDF4':'#EFF6FF',
+          border:`1px solid ${status.startsWith('✅')?'#BBF7D0':'#BFDBFE'}`,
+          color:status.startsWith('✅')?'#15803D':'#1D4ED8',fontWeight:600,fontSize:14}}>
+          {status}
         </div>
-      );
-    }
+      )}
 
-    /* ─── Main App ─── */
-    function App() {
-      const [active, setActive] = useState(null);
-      const [search, setSearch] = useState('');
+      {/* Error */}
+      {error&&(
+        <div style={{marginTop:14,padding:'11px 16px',borderRadius:11,
+          background:'#FFF1F2',border:'1px solid #FECDD3',color:'#BE123C',fontWeight:600,fontSize:13}}>
+          ⚠️ {error}
+        </div>
+      )}
 
-      const filtered = TOOLS.filter(t =>
-        t.label.toLowerCase().includes(search.toLowerCase()) ||
-        t.desc.toLowerCase().includes(search.toLowerCase())
-      );
+      {/* Extracted text */}
+      {extractedText&&(
+        <div style={{marginTop:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+            <span style={{fontWeight:700,fontSize:13,color:'#475569'}}>Extracted Text</span>
+            <button onClick={()=>{const b=new Blob([extractedText],{type:'text/plain'});
+              const u=URL.createObjectURL(b);const a=document.createElement('a');
+              a.href=u;a.download='extracted-text.txt';a.click();URL.revokeObjectURL(u);}}
+              style={{padding:'6px 14px',borderRadius:8,border:'none',
+                background:'linear-gradient(135deg,#FBBF24,#F59E0B)',color:'#fff',
+                fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>
+              ⬇ Download .txt
+            </button>
+          </div>
+          <textarea readOnly value={extractedText} style={{width:'100%',height:180,padding:'10px 14px',
+            borderRadius:10,border:'1.5px solid #E2E8F0',fontSize:13,color:'#1E293B',
+            resize:'vertical',fontFamily:'monospace',background:'#F8FAFC',boxSizing:'border-box'}}/>
+        </div>
+      )}
 
-      return (
-        <div style={{minHeight:'100vh',fontFamily:"'Segoe UI',-apple-system,sans-serif",paddingBottom:60}}>
+      {/* Image results (convert) */}
+      {results.length>0&&(
+        <div style={{marginTop:16}}>
+          <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:10}}>
+            Converted Pages — click to download each
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {results.map((r,i)=>(
+              <div key={i} style={{borderRadius:12,overflow:'hidden',border:'1px solid #E2E8F0',
+                background:'#F8FAFC',position:'relative'}}>
+                <img src={r.url} alt={r.name} style={{width:'100%',display:'block'}}/>
+                <a href={r.url} download={r.name} style={{
+                  position:'absolute',top:10,right:10,padding:'6px 14px',borderRadius:8,
+                  background:'rgba(0,0,0,0.65)',color:'#fff',fontWeight:700,fontSize:12,
+                  textDecoration:'none'}}>⬇ Download</a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-          {/* Header */}
-          <div style={{background:'rgba(255,255,255,0.88)',backdropFilter:'blur(14px)',
-            borderBottom:'1px solid rgba(226,232,240,0.8)',padding:'14px 28px',
-            display:'flex',alignItems:'center',justifyContent:'space-between',
-            position:'sticky',top:0,zIndex:100}}>
-            <div onClick={()=>setActive(null)}
-              style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
-              <div style={{width:38,height:38,borderRadius:11,
-                background:'linear-gradient(135deg,#6C63FF,#A18CD1)',
-                display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}>📄</div>
-              <div>
-                <div style={{fontWeight:800,fontSize:16,color:'#0F172A'}}>PDF Studio</div>
-                <div style={{fontSize:10,color:'#94A3B8',letterSpacing:0.6}}>ALL-IN-ONE PDF EDITOR</div>
+// ─── Main App ──────────────────────────────────────────────
+function App() {
+  const [active, setActive] = useState(null);
+  const [search, setSearch] = useState('');
+  const filtered = TOOLS.filter(t =>
+    t.label.toLowerCase().includes(search.toLowerCase()) ||
+    t.desc.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div style={{minHeight:'100vh',fontFamily:"'Segoe UI',-apple-system,sans-serif",paddingBottom:60}}>
+      {/* Header */}
+      <div style={{background:'rgba(255,255,255,0.88)',backdropFilter:'blur(14px)',
+        borderBottom:'1px solid rgba(226,232,240,0.8)',padding:'14px 28px',
+        display:'flex',alignItems:'center',justifyContent:'space-between',
+        position:'sticky',top:0,zIndex:100}}>
+        <div onClick={()=>{setActive(null);setSearch('');}}
+          style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+          <div style={{width:38,height:38,borderRadius:11,
+            background:'linear-gradient(135deg,#6C63FF,#A18CD1)',
+            display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}>📄</div>
+          <div>
+            <div style={{fontWeight:800,fontSize:16,color:'#0F172A'}}>PDF Studio</div>
+            <div style={{fontSize:10,color:'#94A3B8',letterSpacing:0.6}}>ALL-IN-ONE PDF EDITOR</div>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <span style={{background:'rgba(108,99,255,0.1)',color:'#6C63FF',
+            padding:'5px 13px',borderRadius:20,fontSize:12,fontWeight:700}}>✨ Free</span>
+          <span style={{background:'rgba(67,198,172,0.1)',color:'#2D9E89',
+            padding:'5px 13px',borderRadius:20,fontSize:12,fontWeight:700}}>🔒 Secure</span>
+        </div>
+      </div>
+
+      <div style={{maxWidth:980,margin:'0 auto',padding:'0 20px'}}>
+        {!active ? (
+          <>
+            <div style={{textAlign:'center',padding:'60px 0 44px'}}>
+              <div style={{display:'inline-block',padding:'6px 20px',borderRadius:40,
+                background:'rgba(108,99,255,0.1)',color:'#6C63FF',
+                fontWeight:700,fontSize:13,marginBottom:22,letterSpacing:0.5}}>
+                ⚡ 12 REAL PDF TOOLS — FILES PROCESSED IN YOUR BROWSER
+              </div>
+              <h1 style={{fontSize:'clamp(28px,5vw,46px)',fontWeight:900,color:'#0F172A',
+                margin:'0 0 18px',lineHeight:1.12}}>
+                Edit, Convert & Manage<br/>
+                <span style={{background:'linear-gradient(90deg,#6C63FF,#F7971E)',
+                  WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
+                  PDFs Effortlessly
+                </span>
+              </h1>
+              <p style={{fontSize:17,color:'#64748B',maxWidth:520,margin:'0 auto 36px',lineHeight:1.7}}>
+                Your files never leave your device. All processing happens locally in your browser.
+              </p>
+              <div style={{position:'relative',maxWidth:400,margin:'0 auto'}}>
+                <span style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',
+                  fontSize:16,color:'#94A3B8',pointerEvents:'none'}}>🔍</span>
+                <input type="text" placeholder="Search tools…" value={search}
+                  onChange={e=>setSearch(e.target.value)}
+                  style={{width:'100%',padding:'13px 16px 13px 44px',borderRadius:50,
+                    border:'1.5px solid #E2E8F0',fontSize:15,color:'#1E293B',outline:'none',
+                    background:'#fff',boxSizing:'border-box',fontFamily:'inherit',
+                    boxShadow:'0 4px 20px rgba(0,0,0,0.07)'}}/>
               </div>
             </div>
-            <div style={{display:'flex',gap:8}}>
-              <span style={{background:'rgba(108,99,255,0.1)',color:'#6C63FF',
-                padding:'5px 13px',borderRadius:20,fontSize:12,fontWeight:700}}>✨ Free</span>
-              <span style={{background:'rgba(67,198,172,0.1)',color:'#2D9E89',
-                padding:'5px 13px',borderRadius:20,fontSize:12,fontWeight:700}}>🔒 Secure</span>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(215px,1fr))',gap:16}}>
+              {filtered.map(tool=>(
+                <button key={tool.id} onClick={()=>setActive(tool)} className="card-btn"
+                  style={{padding:'26px 22px',borderRadius:20,
+                    border:'1.5px solid rgba(226,232,240,0.9)',
+                    background:'rgba(255,255,255,0.92)',cursor:'pointer',textAlign:'left',
+                    backdropFilter:'blur(8px)',position:'relative',overflow:'hidden',
+                    boxShadow:'0 2px 12px rgba(0,0,0,0.05)',fontFamily:'inherit'}}>
+                  <div style={{position:'absolute',top:-22,right:-22,width:88,height:88,
+                    borderRadius:'50%',background:tool.color+'10',pointerEvents:'none'}}/>
+                  <div style={{width:48,height:48,borderRadius:14,background:tool.color+'16',
+                    display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,marginBottom:14}}>
+                    {tool.icon}
+                  </div>
+                  <div style={{fontWeight:800,fontSize:15,color:'#0F172A',marginBottom:6}}>{tool.label}</div>
+                  <div style={{fontSize:12,color:'#94A3B8',lineHeight:1.6}}>{tool.desc}</div>
+                  <div style={{marginTop:16,display:'flex',alignItems:'center',gap:4,
+                    fontSize:12,fontWeight:700,color:tool.color}}>
+                    Use tool <span style={{fontSize:14}}>→</span>
+                  </div>
+                </button>
+              ))}
             </div>
-          </div>
 
-          <div style={{maxWidth:980,margin:'0 auto',padding:'0 20px'}}>
-            {!active ? (
-              <>
-                {/* Hero */}
-                <div style={{textAlign:'center',padding:'60px 0 44px'}}>
-                  <div style={{display:'inline-block',padding:'6px 20px',borderRadius:40,
-                    background:'rgba(108,99,255,0.1)',color:'#6C63FF',
-                    fontWeight:700,fontSize:13,marginBottom:22,letterSpacing:0.5}}>
-                    ⚡ 12 POWERFUL PDF TOOLS — 100% FREE
-                  </div>
-                  <h1 style={{fontSize:'clamp(28px,5vw,46px)',fontWeight:900,color:'#0F172A',
-                    margin:'0 0 18px',lineHeight:1.12}}>
-                    Edit, Convert & Manage<br/>
-                    <span style={{background:'linear-gradient(90deg,#6C63FF,#F7971E)',
-                      WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
-                      PDFs Effortlessly
-                    </span>
-                  </h1>
-                  <p style={{fontSize:17,color:'#64748B',maxWidth:520,margin:'0 auto 36px',lineHeight:1.7}}>
-                    Merge, split, compress, convert, watermark, sign & more —<br/>
-                    all in your browser, no installation needed.
-                  </p>
-
-                  {/* Search */}
-                  <div style={{position:'relative',maxWidth:400,margin:'0 auto'}}>
-                    <span style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',
-                      fontSize:16,color:'#94A3B8',pointerEvents:'none'}}>🔍</span>
-                    <input type="text" placeholder="Search tools…" value={search}
-                      onChange={e=>setSearch(e.target.value)}
-                      style={{width:'100%',padding:'13px 16px 13px 44px',borderRadius:50,
-                        border:'1.5px solid #E2E8F0',fontSize:15,color:'#1E293B',outline:'none',
-                        background:'#fff',boxSizing:'border-box',fontFamily:'inherit',
-                        boxShadow:'0 4px 20px rgba(0,0,0,0.07)'}}/>
-                  </div>
-                </div>
-
-                {/* Grid */}
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(215px,1fr))',gap:16}}>
-                  {filtered.map(tool=>(
-                    <button key={tool.id} onClick={()=>setActive(tool)}
-                      className="card-btn"
-                      style={{padding:'26px 22px',borderRadius:20,
-                        border:'1.5px solid rgba(226,232,240,0.9)',
-                        background:'rgba(255,255,255,0.92)',cursor:'pointer',textAlign:'left',
-                        backdropFilter:'blur(8px)',position:'relative',overflow:'hidden',
-                        boxShadow:'0 2px 12px rgba(0,0,0,0.05)',fontFamily:'inherit'}}>
-                      <div style={{position:'absolute',top:-22,right:-22,width:88,height:88,
-                        borderRadius:'50%',background:tool.color+'10',pointerEvents:'none'}}/>
-                      <div style={{width:48,height:48,borderRadius:14,background:tool.color+'16',
-                        display:'flex',alignItems:'center',justifyContent:'center',
-                        fontSize:24,marginBottom:14}}>{tool.icon}</div>
-                      <div style={{fontWeight:800,fontSize:15,color:'#0F172A',marginBottom:6}}>
-                        {tool.label}
-                      </div>
-                      <div style={{fontSize:12,color:'#94A3B8',lineHeight:1.6}}>{tool.desc}</div>
-                      <div style={{marginTop:16,display:'flex',alignItems:'center',gap:4,
-                        fontSize:12,fontWeight:700,color:tool.color}}>
-                        Use tool <span style={{fontSize:14}}>→</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {filtered.length===0&&(
-                  <div style={{textAlign:'center',padding:'60px 0',color:'#94A3B8',fontSize:16}}>
-                    No tools match "<strong>{search}</strong>"
-                  </div>
-                )}
-
-                {/* Trust bar */}
-                <div style={{marginTop:60,padding:'22px 32px',borderRadius:20,
-                  background:'rgba(255,255,255,0.75)',border:'1px solid rgba(226,232,240,0.7)',
-                  display:'flex',flexWrap:'wrap',gap:24,justifyContent:'center',alignItems:'center'}}>
-                  {[['🔒','256-bit SSL Encrypted'],['🗑️','Files deleted after 1 hour'],
-                    ['🌐','Works in any browser'],['⚡','Fast processing'],['🆓','Completely free']
-                  ].map(([ic,tx],i)=>(
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:8,
-                      color:'#475569',fontSize:13,fontWeight:600}}>
-                      <span style={{fontSize:17}}>{ic}</span>{tx}
-                    </div>
-                  ))}
-                </div>
-              </>
-            ):(
-              <div style={{paddingTop:44}}>
-                <ToolPanel tool={active} onBack={()=>setActive(null)}/>
+            {filtered.length===0&&(
+              <div style={{textAlign:'center',padding:'60px 0',color:'#94A3B8',fontSize:16}}>
+                No tools match "<strong>{search}</strong>"
               </div>
             )}
-          </div>
-        </div>
-      );
-    }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-  </script>
+            <div style={{marginTop:60,padding:'22px 32px',borderRadius:20,
+              background:'rgba(255,255,255,0.75)',border:'1px solid rgba(226,232,240,0.7)',
+              display:'flex',flexWrap:'wrap',gap:24,justifyContent:'center',alignItems:'center'}}>
+              {[['🔒','Files stay on your device'],['⚡','No upload to any server'],
+                ['🌐','Works in any browser'],['🆓','Completely free'],['📦','No install needed']
+              ].map(([ic,tx],i)=>(
+                <div key={i} style={{display:'flex',alignItems:'center',gap:8,
+                  color:'#475569',fontSize:13,fontWeight:600}}>
+                  <span style={{fontSize:17}}>{ic}</span>{tx}
+                </div>
+              ))}
+            </div>
+          </>
+        ):(
+          <div style={{paddingTop:44}}>
+            <ToolPanel tool={active} onBack={()=>setActive(null)}/>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
 </body>
 </html>

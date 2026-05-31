@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Studio – All-in-One PDF Editor</title>
+  <meta name="description" content="Free online PDF tools. Merge, split, compress, convert, sign, protect PDFs and more." />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(160deg, #F0F4FF 0%, #FAF5FF 50%, #F0FFF4 100%);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    input[type=range] {
+      -webkit-appearance: none; appearance: none;
+      height: 6px; border-radius: 100px;
+      background: #E2E8F0; outline: none; cursor: pointer; width: 100%;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: linear-gradient(135deg, #6C63FF, #A18CD1);
+      cursor: pointer; box-shadow: 0 2px 8px rgba(108,99,255,0.4);
+    }
+    * { transition: none; }
+    .card-btn { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important; }
+    .card-btn:hover { transform: translateY(-4px) !important; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 100px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    const TOOLS = [
+      { id:'merge',     icon:'🔗', label:'Merge PDFs',    desc:'Combine multiple PDFs into one',        color:'#6C63FF' },
+      { id:'split',     icon:'✂️',  label:'Split PDF',     desc:'Divide PDF into separate files',         color:'#FF6584' },
+      { id:'compress',  icon:'🗜️',  label:'Compress',      desc:'Reduce file size without quality loss',  color:'#43C6AC' },
+      { id:'convert',   icon:'🔄', label:'Convert',        desc:'PDF to Word, Excel, Image & more',       color:'#F7971E' },
+      { id:'edit',      icon:'✏️',  label:'Edit PDF',       desc:'Add text, images & annotations',         color:'#A18CD1' },
+      { id:'sign',      icon:'🖊️', label:'Sign PDF',       desc:'Digitally sign your documents',          color:'#EC4899' },
+      { id:'protect',   icon:'🔒', label:'Protect',        desc:'Password protect your PDF',              color:'#4FACFE' },
+      { id:'unlock',    icon:'🔓', label:'Unlock',         desc:'Remove PDF password',                    color:'#43E97B' },
+      { id:'rotate',    icon:'🔃', label:'Rotate',         desc:'Rotate pages to any angle',              color:'#F093FB' },
+      { id:'watermark', icon:'💧', label:'Watermark',      desc:'Add text or image watermark',            color:'#38BDF8' },
+      { id:'pageno',    icon:'📄', label:'Page Numbers',   desc:'Add page numbers to PDF',                color:'#FA709A' },
+      { id:'ocr',       icon:'🔍', label:'OCR',            desc:'Extract text from scanned PDFs',         color:'#FBBF24' },
+    ];
+
+    const CONVERT_FORMATS = [
+      { label:'PDF → Word', icon:'📝' }, { label:'PDF → Excel', icon:'📊' },
+      { label:'PDF → PPT',  icon:'📑' }, { label:'PDF → JPG',   icon:'🖼️' },
+      { label:'PDF → PNG',  icon:'🖼️' }, { label:'Word → PDF',  icon:'📄' },
+      { label:'Excel → PDF',icon:'📄' }, { label:'JPG → PDF',   icon:'📄' },
+    ];
+
+    /* ─── DropZone ─── */
+    function DropZone({ onFiles, multiple, label }) {
+      const [drag, setDrag] = useState(false);
+      const ref = useRef();
+      return (
+        <div
+          onDragOver={e=>{e.preventDefault();setDrag(true)}}
+          onDragLeave={()=>setDrag(false)}
+          onDrop={e=>{e.preventDefault();setDrag(false);const f=Array.from(e.dataTransfer.files);if(f.length)onFiles(multiple?f:[f[0]])}}
+          onClick={()=>ref.current.click()}
+          style={{
+            border:`2px dashed ${drag?'#6C63FF':'#CBD5E1'}`,
+            borderRadius:16, padding:'40px 24px', textAlign:'center',
+            cursor:'pointer', background:drag?'rgba(108,99,255,0.06)':'rgba(248,250,252,0.8)',
+            transition:'all 0.25s',
+          }}
+        >
+          <input ref={ref} type="file" accept=".pdf,application/pdf" multiple={multiple} style={{display:'none'}}
+            onChange={e=>onFiles(multiple?Array.from(e.target.files):[e.target.files[0]])} />
+          <div style={{fontSize:48,marginBottom:12}}>📁</div>
+          <div style={{fontWeight:700,fontSize:17,color:'#1E293B',marginBottom:6}}>{label||'Drop your PDF here'}</div>
+          <div style={{fontSize:13,color:'#94A3B8'}}>or click to browse • PDF files supported</div>
+          <div style={{display:'inline-block',marginTop:16,padding:'9px 28px',borderRadius:40,
+            background:'linear-gradient(135deg,#6C63FF,#A18CD1)',color:'#fff',fontWeight:600,fontSize:13}}>
+            Choose File{multiple?'s':''}
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── FileChip ─── */
+    function FileChip({ file, onRemove }) {
+      return (
+        <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 14px',borderRadius:10,
+          background:'rgba(108,99,255,0.08)',border:'1px solid rgba(108,99,255,0.2)'}}>
+          <span style={{fontSize:18}}>📄</span>
+          <span style={{fontWeight:600,fontSize:13,color:'#1E293B',flex:1,overflow:'hidden',
+            textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:160}}>{file.name}</span>
+          <span style={{fontSize:11,color:'#94A3B8'}}>{(file.size/1024).toFixed(0)} KB</span>
+          <button onClick={e=>{e.stopPropagation();onRemove()}}
+            style={{border:'none',background:'none',cursor:'pointer',color:'#94A3B8',fontSize:16,padding:2}}>✕</button>
+        </div>
+      );
+    }
+
+    /* ─── Progress Overlay ─── */
+    function Overlay({ tool, onDone }) {
+      const [pct, setPct] = useState(0);
+      const [done, setDone] = useState(false);
+      useEffect(()=>{
+        const t = setInterval(()=>{
+          setPct(p=>{
+            const n = p + Math.random()*18;
+            if(n>=100){clearInterval(t);setDone(true);return 100;}
+            return n;
+          });
+        },180);
+        return ()=>clearInterval(t);
+      },[]);
+      return (
+        <div style={{position:'fixed',inset:0,background:'rgba(15,23,42,0.75)',display:'flex',
+          alignItems:'center',justifyContent:'center',zIndex:999,backdropFilter:'blur(8px)'}}>
+          <div style={{background:'#fff',borderRadius:24,padding:'44px 52px',textAlign:'center',
+            maxWidth:380,width:'90%',boxShadow:'0 32px 80px rgba(0,0,0,0.28)'}}>
+            <div style={{fontSize:60,marginBottom:16}}>{done?'✅':tool.icon}</div>
+            <div style={{fontWeight:800,fontSize:21,color:'#1E293B',marginBottom:8}}>
+              {done?'All Done!':'Processing...'}
+            </div>
+            <div style={{color:'#64748B',fontSize:14,marginBottom:26}}>
+              {done?'Your file is ready to download.':`Running ${tool.label} on your file`}
+            </div>
+            <div style={{background:'#F1F5F9',borderRadius:100,height:8,overflow:'hidden',marginBottom:20}}>
+              <div style={{height:'100%',borderRadius:100,transition:'width 0.3s ease',
+                background:`linear-gradient(90deg,${tool.color},#A18CD1)`,width:`${Math.min(pct,100)}%`}}/>
+            </div>
+            {done?(
+              <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+                <button onClick={onDone} style={{padding:'11px 30px',borderRadius:40,border:'none',
+                  background:`linear-gradient(135deg,${tool.color},#A18CD1)`,
+                  color:'#fff',fontWeight:700,fontSize:14,cursor:'pointer'}}>⬇ Download</button>
+                <button onClick={onDone} style={{padding:'11px 22px',borderRadius:40,
+                  border:'1.5px solid #E2E8F0',background:'#fff',
+                  color:'#64748B',fontWeight:600,fontSize:14,cursor:'pointer'}}>Close</button>
+              </div>
+            ):(
+              <div style={{color:'#94A3B8',fontSize:12}}>{Math.min(Math.round(pct),100)}% complete</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── Tool Settings ─── */
+    function ToolPanel({ tool, onBack }) {
+      const [files, setFiles] = useState([]);
+      const [busy, setBusy] = useState(false);
+      const [s, setS] = useState({
+        password:'', confirm:'', waterText:'CONFIDENTIAL', waterOpacity:50,
+        rotate:'90', splitPages:'', convertFmt:'PDF → Word',
+        compress:'medium', pagePos:'bottom-center', ocrLang:'eng',
+      });
+      const set = (k,v) => setS(p=>({...p,[k]:v}));
+      const addFiles = f => setFiles(p => tool.id==='merge'?[...p,...f]:f);
+      const rm = i => setFiles(p=>p.filter((_,j)=>j!==i));
+
+      const inp = {width:'100%',padding:'10px 14px',borderRadius:10,border:'1.5px solid #E2E8F0',
+        fontSize:14,color:'#1E293B',outline:'none',boxSizing:'border-box',fontFamily:'inherit'};
+
+      const choiceBtn = (active, color, label, onClick) => (
+        <button onClick={onClick} style={{flex:1,padding:'12px 6px',borderRadius:12,border:'2px solid',
+          borderColor:active?color:'#E2E8F0',background:active?color+'18':'#F8FAFC',
+          color:active?color:'#64748B',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>
+          {label}
+        </button>
+      );
+
+      const settings = () => {
+        switch(tool.id) {
+          case 'merge': return files.length>1&&(
+            <div style={{marginTop:20}}>
+              <div style={{fontWeight:700,fontSize:12,color:'#94A3B8',marginBottom:10,letterSpacing:1,textTransform:'uppercase'}}>
+                Merge Order ({files.length} files)
+              </div>
+              {files.map((f,i)=>(
+                <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',
+                  borderRadius:10,background:'#F8FAFC',border:'1px solid #E2E8F0',marginBottom:8}}>
+                  <span style={{color:'#94A3B8',fontSize:13,minWidth:22,textAlign:'center',
+                    fontWeight:700}}>{i+1}</span>
+                  <span style={{fontSize:16}}>📄</span>
+                  <span style={{flex:1,fontSize:13,fontWeight:600,color:'#1E293B',overflow:'hidden',
+                    textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.name}</span>
+                  <button onClick={()=>rm(i)} style={{border:'none',background:'none',
+                    cursor:'pointer',color:'#CBD5E1',fontSize:15}}>✕</button>
+                </div>
+              ))}
+            </div>
+          );
+
+          case 'split': return (
+            <div style={{marginTop:20}}>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:8}}>
+                Split at pages (e.g. 2,4,7)
+              </label>
+              <input type="text" placeholder="2,4,7 — leave blank to split every page"
+                value={s.splitPages} onChange={e=>set('splitPages',e.target.value)} style={inp}/>
+              <div style={{marginTop:8,fontSize:12,color:'#94A3B8'}}>
+                Result: individual PDF files for each section
+              </div>
+            </div>
+          );
+
+          case 'compress': return (
+            <div style={{marginTop:20}}>
+              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Compression Level</div>
+              <div style={{display:'flex',gap:10}}>
+                {choiceBtn(s.compress==='low',   tool.color,'🟡 Low',    ()=>set('compress','low'))}
+                {choiceBtn(s.compress==='medium', tool.color,'🟠 Medium', ()=>set('compress','medium'))}
+                {choiceBtn(s.compress==='high',   tool.color,'🔴 High',   ()=>set('compress','high'))}
+              </div>
+              <div style={{marginTop:10,fontSize:12,color:'#94A3B8',padding:'10px 14px',
+                borderRadius:10,background:'#F8FAFC',marginTop:12}}>
+                {s.compress==='low'?'⚡ Slight compression — best quality preserved'
+                  :s.compress==='medium'?'⚖️ Balanced size & quality — recommended'
+                  :'🗜️ Maximum compression — smallest possible file'}
+              </div>
+            </div>
+          );
+
+          case 'convert': return (
+            <div style={{marginTop:20}}>
+              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Select Output Format</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+                {CONVERT_FORMATS.map((f,i)=>(
+                  <button key={i} onClick={()=>set('convertFmt',f.label)} style={{
+                    padding:12,borderRadius:12,border:'2px solid',
+                    borderColor:s.convertFmt===f.label?tool.color:'#E2E8F0',
+                    background:s.convertFmt===f.label?tool.color+'12':'#F8FAFC',
+                    color:s.convertFmt===f.label?tool.color:'#475569',
+                    fontWeight:600,fontSize:13,cursor:'pointer',
+                    display:'flex',alignItems:'center',gap:8,fontFamily:'inherit'}}>
+                    <span>{f.icon}</span>{f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+
+          case 'protect': return (
+            <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:14}}>
+              <div>
+                <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>Password</label>
+                <input type="password" placeholder="Enter a strong password"
+                  value={s.password} onChange={e=>set('password',e.target.value)} style={inp}/>
+              </div>
+              <div>
+                <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>Confirm Password</label>
+                <input type="password" placeholder="Re-enter password"
+                  value={s.confirm} onChange={e=>set('confirm',e.target.value)} style={inp}/>
+              </div>
+              {s.password && s.confirm && s.password!==s.confirm&&(
+                <div style={{padding:'10px 14px',borderRadius:10,background:'#FFF1F2',
+                  border:'1px solid #FECDD3',color:'#E11D48',fontSize:13,fontWeight:600}}>
+                  ⚠️ Passwords do not match
+                </div>
+              )}
+            </div>
+          );
+
+          case 'unlock': return (
+            <div style={{marginTop:20}}>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
+                PDF Password
+              </label>
+              <input type="password" placeholder="Enter password to unlock PDF"
+                value={s.password} onChange={e=>set('password',e.target.value)} style={inp}/>
+              <div style={{marginTop:10,fontSize:12,color:'#94A3B8'}}>
+                The password will be removed from the output file
+              </div>
+            </div>
+          );
+
+          case 'rotate': return (
+            <div style={{marginTop:20}}>
+              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Rotation Angle</div>
+              <div style={{display:'flex',gap:10}}>
+                {['90°','180°','270°','-90°'].map(d=>(
+                  <button key={d} onClick={()=>set('rotate',d)} style={{
+                    flex:1,padding:'14px 4px',borderRadius:12,border:'2px solid',
+                    borderColor:s.rotate===d?tool.color:'#E2E8F0',
+                    background:s.rotate===d?tool.color+'12':'#F8FAFC',
+                    color:s.rotate===d?tool.color:'#64748B',
+                    fontWeight:700,fontSize:14,cursor:'pointer',fontFamily:'inherit'}}>
+                    {d}
+                  </button>
+                ))}
+              </div>
+              <div style={{marginTop:16,textAlign:'center',fontSize:36,
+                transform:`rotate(${s.rotate.replace('°','').replace('−','-')}deg)`,
+                transition:'transform 0.3s ease', display:'inline-block', width:'100%'}}>📄</div>
+            </div>
+          );
+
+          case 'watermark': return (
+            <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:14}}>
+              <div>
+                <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:6}}>
+                  Watermark Text
+                </label>
+                <input type="text" placeholder="e.g. CONFIDENTIAL"
+                  value={s.waterText} onChange={e=>set('waterText',e.target.value)} style={inp}/>
+              </div>
+              <div>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                  <label style={{fontWeight:700,fontSize:13,color:'#475569'}}>Opacity</label>
+                  <span style={{fontSize:13,fontWeight:700,color:tool.color}}>{s.waterOpacity}%</span>
+                </div>
+                <input type="range" min={10} max={100} value={s.waterOpacity}
+                  onChange={e=>set('waterOpacity',+e.target.value)}/>
+              </div>
+              <div style={{padding:'24px 20px',borderRadius:12,background:'#F8FAFC',
+                border:'1px solid #E2E8F0',position:'relative',minHeight:90,
+                display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
+                <span style={{fontSize:20,fontWeight:900,color:'#475569',letterSpacing:4,
+                  opacity:s.waterOpacity/100,transform:'rotate(-25deg)',display:'block'}}>
+                  {s.waterText||'WATERMARK'}
+                </span>
+                <span style={{position:'absolute',bottom:6,right:10,fontSize:11,color:'#CBD5E1'}}>
+                  Live Preview
+                </span>
+              </div>
+            </div>
+          );
+
+          case 'sign': return (
+            <div style={{marginTop:20}}>
+              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Signature Method</div>
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {[['✍️','Draw','Draw your signature with mouse or touch'],
+                  ['⌨️','Type','Type your name in a handwritten style'],
+                  ['📤','Upload','Upload an image of your signature']].map(([ic,t,d])=>(
+                  <div key={t} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',
+                    borderRadius:12,border:'1.5px solid #E2E8F0',background:'#F8FAFC',cursor:'pointer'}}>
+                    <span style={{fontSize:22}}>{ic}</span>
+                    <div>
+                      <div style={{fontWeight:700,fontSize:14,color:'#1E293B'}}>{t}</div>
+                      <div style={{fontSize:12,color:'#94A3B8'}}>{d}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+
+          case 'pageno': return (
+            <div style={{marginTop:20}}>
+              <div style={{fontWeight:700,fontSize:13,color:'#475569',marginBottom:12}}>Number Position</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+                {['top-left','top-center','top-right','bottom-left','bottom-center','bottom-right'].map(p=>(
+                  <button key={p} onClick={()=>set('pagePos',p)} style={{
+                    padding:'10px 4px',borderRadius:10,border:'2px solid',
+                    borderColor:s.pagePos===p?tool.color:'#E2E8F0',
+                    background:s.pagePos===p?tool.color+'12':'#F8FAFC',
+                    color:s.pagePos===p?tool.color:'#64748B',
+                    fontWeight:600,fontSize:11,cursor:'pointer',
+                    textTransform:'capitalize',fontFamily:'inherit'}}>
+                    {p.replace('-',' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+
+          case 'ocr': return (
+            <div style={{marginTop:20}}>
+              <label style={{fontWeight:700,fontSize:13,color:'#475569',display:'block',marginBottom:10}}>
+                Document Language
+              </label>
+              <select value={s.ocrLang} onChange={e=>set('ocrLang',e.target.value)}
+                style={{...inp,background:'#fff',cursor:'pointer'}}>
+                {[['eng','English'],['hin','Hindi'],['fra','French'],['deu','German'],
+                  ['spa','Spanish'],['por','Portuguese'],['ara','Arabic'],
+                  ['chi_sim','Chinese (Simplified)'],['jpn','Japanese'],['rus','Russian']
+                ].map(([v,l])=><option key={v} value={v}>{l}</option>)}
+              </select>
+              <div style={{marginTop:12,padding:'10px 14px',borderRadius:10,background:'#FFFBEB',
+                border:'1px solid #FDE68A',fontSize:12,color:'#92400E'}}>
+                💡 OCR works best on clear, high-resolution scanned documents
+              </div>
+            </div>
+          );
+
+          case 'edit': return (
+            <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:10}}>
+              {[['📝','Add Text','Insert text boxes anywhere on the page'],
+                ['🖼️','Add Image','Insert images into the document'],
+                ['🖍️','Highlight','Highlight important text'],
+                ['💬','Annotate','Add comments and sticky notes'],
+                ['📐','Draw Shapes','Add arrows, lines, rectangles']].map(([ic,t,d])=>(
+                <div key={t} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 16px',
+                  borderRadius:12,border:'1.5px solid #E2E8F0',background:'#F8FAFC'}}>
+                  <span style={{fontSize:20}}>{ic}</span>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:13,color:'#1E293B'}}>{t}</div>
+                    <div style={{fontSize:12,color:'#94A3B8'}}>{d}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+
+          default: return null;
+        }
+      };
+
+      return (
+        <div style={{maxWidth:560,margin:'0 auto'}}>
+          {busy && <Overlay tool={tool} onDone={()=>setBusy(false)}/>}
+
+          <button onClick={onBack} style={{display:'flex',alignItems:'center',gap:6,
+            background:'none',border:'none',cursor:'pointer',color:'#64748B',
+            fontWeight:600,fontSize:14,marginBottom:28,padding:0,fontFamily:'inherit'}}>
+            ← Back to all tools
+          </button>
+
+          <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:30}}>
+            <div style={{width:60,height:60,borderRadius:18,background:tool.color+'18',
+              display:'flex',alignItems:'center',justifyContent:'center',fontSize:30}}>
+              {tool.icon}
+            </div>
+            <div>
+              <h2 style={{margin:0,fontWeight:800,fontSize:23,color:'#0F172A'}}>{tool.label}</h2>
+              <p style={{margin:'4px 0 0',color:'#64748B',fontSize:14}}>{tool.desc}</p>
+            </div>
+          </div>
+
+          <DropZone onFiles={addFiles} multiple={tool.id==='merge'}
+            label={tool.id==='merge'?'Drop multiple PDFs here':'Drop your PDF here'}/>
+
+          {files.length>0 && tool.id!=='merge'&&(
+            <div style={{marginTop:14,display:'flex',flexWrap:'wrap',gap:8}}>
+              {files.map((f,i)=><FileChip key={i} file={f} onRemove={()=>rm(i)}/>)}
+            </div>
+          )}
+
+          {settings()}
+
+          <button
+            disabled={files.length===0}
+            onClick={()=>setBusy(true)}
+            style={{
+              marginTop:28,width:'100%',padding:17,borderRadius:14,border:'none',
+              background:files.length>0?`linear-gradient(135deg,${tool.color},#A18CD1)`:'#E2E8F0',
+              color:files.length>0?'#fff':'#94A3B8',fontWeight:800,fontSize:16,
+              cursor:files.length>0?'pointer':'not-allowed',fontFamily:'inherit',
+              boxShadow:files.length>0?`0 8px 28px ${tool.color}45`:'none',
+            }}>
+            {tool.icon} {tool.label}
+          </button>
+
+          {files.length===0&&(
+            <p style={{textAlign:'center',marginTop:10,fontSize:13,color:'#94A3B8'}}>
+              Upload a file above to get started
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    /* ─── Main App ─── */
+    function App() {
+      const [active, setActive] = useState(null);
+      const [search, setSearch] = useState('');
+
+      const filtered = TOOLS.filter(t =>
+        t.label.toLowerCase().includes(search.toLowerCase()) ||
+        t.desc.toLowerCase().includes(search.toLowerCase())
+      );
+
+      return (
+        <div style={{minHeight:'100vh',fontFamily:"'Segoe UI',-apple-system,sans-serif",paddingBottom:60}}>
+
+          {/* Header */}
+          <div style={{background:'rgba(255,255,255,0.88)',backdropFilter:'blur(14px)',
+            borderBottom:'1px solid rgba(226,232,240,0.8)',padding:'14px 28px',
+            display:'flex',alignItems:'center',justifyContent:'space-between',
+            position:'sticky',top:0,zIndex:100}}>
+            <div onClick={()=>setActive(null)}
+              style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+              <div style={{width:38,height:38,borderRadius:11,
+                background:'linear-gradient(135deg,#6C63FF,#A18CD1)',
+                display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}>📄</div>
+              <div>
+                <div style={{fontWeight:800,fontSize:16,color:'#0F172A'}}>PDF Studio</div>
+                <div style={{fontSize:10,color:'#94A3B8',letterSpacing:0.6}}>ALL-IN-ONE PDF EDITOR</div>
+              </div>
+            </div>
+            <div style={{display:'flex',gap:8}}>
+              <span style={{background:'rgba(108,99,255,0.1)',color:'#6C63FF',
+                padding:'5px 13px',borderRadius:20,fontSize:12,fontWeight:700}}>✨ Free</span>
+              <span style={{background:'rgba(67,198,172,0.1)',color:'#2D9E89',
+                padding:'5px 13px',borderRadius:20,fontSize:12,fontWeight:700}}>🔒 Secure</span>
+            </div>
+          </div>
+
+          <div style={{maxWidth:980,margin:'0 auto',padding:'0 20px'}}>
+            {!active ? (
+              <>
+                {/* Hero */}
+                <div style={{textAlign:'center',padding:'60px 0 44px'}}>
+                  <div style={{display:'inline-block',padding:'6px 20px',borderRadius:40,
+                    background:'rgba(108,99,255,0.1)',color:'#6C63FF',
+                    fontWeight:700,fontSize:13,marginBottom:22,letterSpacing:0.5}}>
+                    ⚡ 12 POWERFUL PDF TOOLS — 100% FREE
+                  </div>
+                  <h1 style={{fontSize:'clamp(28px,5vw,46px)',fontWeight:900,color:'#0F172A',
+                    margin:'0 0 18px',lineHeight:1.12}}>
+                    Edit, Convert & Manage<br/>
+                    <span style={{background:'linear-gradient(90deg,#6C63FF,#F7971E)',
+                      WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
+                      PDFs Effortlessly
+                    </span>
+                  </h1>
+                  <p style={{fontSize:17,color:'#64748B',maxWidth:520,margin:'0 auto 36px',lineHeight:1.7}}>
+                    Merge, split, compress, convert, watermark, sign & more —<br/>
+                    all in your browser, no installation needed.
+                  </p>
+
+                  {/* Search */}
+                  <div style={{position:'relative',maxWidth:400,margin:'0 auto'}}>
+                    <span style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',
+                      fontSize:16,color:'#94A3B8',pointerEvents:'none'}}>🔍</span>
+                    <input type="text" placeholder="Search tools…" value={search}
+                      onChange={e=>setSearch(e.target.value)}
+                      style={{width:'100%',padding:'13px 16px 13px 44px',borderRadius:50,
+                        border:'1.5px solid #E2E8F0',fontSize:15,color:'#1E293B',outline:'none',
+                        background:'#fff',boxSizing:'border-box',fontFamily:'inherit',
+                        boxShadow:'0 4px 20px rgba(0,0,0,0.07)'}}/>
+                  </div>
+                </div>
+
+                {/* Grid */}
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(215px,1fr))',gap:16}}>
+                  {filtered.map(tool=>(
+                    <button key={tool.id} onClick={()=>setActive(tool)}
+                      className="card-btn"
+                      style={{padding:'26px 22px',borderRadius:20,
+                        border:'1.5px solid rgba(226,232,240,0.9)',
+                        background:'rgba(255,255,255,0.92)',cursor:'pointer',textAlign:'left',
+                        backdropFilter:'blur(8px)',position:'relative',overflow:'hidden',
+                        boxShadow:'0 2px 12px rgba(0,0,0,0.05)',fontFamily:'inherit'}}>
+                      <div style={{position:'absolute',top:-22,right:-22,width:88,height:88,
+                        borderRadius:'50%',background:tool.color+'10',pointerEvents:'none'}}/>
+                      <div style={{width:48,height:48,borderRadius:14,background:tool.color+'16',
+                        display:'flex',alignItems:'center',justifyContent:'center',
+                        fontSize:24,marginBottom:14}}>{tool.icon}</div>
+                      <div style={{fontWeight:800,fontSize:15,color:'#0F172A',marginBottom:6}}>
+                        {tool.label}
+                      </div>
+                      <div style={{fontSize:12,color:'#94A3B8',lineHeight:1.6}}>{tool.desc}</div>
+                      <div style={{marginTop:16,display:'flex',alignItems:'center',gap:4,
+                        fontSize:12,fontWeight:700,color:tool.color}}>
+                        Use tool <span style={{fontSize:14}}>→</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {filtered.length===0&&(
+                  <div style={{textAlign:'center',padding:'60px 0',color:'#94A3B8',fontSize:16}}>
+                    No tools match "<strong>{search}</strong>"
+                  </div>
+                )}
+
+                {/* Trust bar */}
+                <div style={{marginTop:60,padding:'22px 32px',borderRadius:20,
+                  background:'rgba(255,255,255,0.75)',border:'1px solid rgba(226,232,240,0.7)',
+                  display:'flex',flexWrap:'wrap',gap:24,justifyContent:'center',alignItems:'center'}}>
+                  {[['🔒','256-bit SSL Encrypted'],['🗑️','Files deleted after 1 hour'],
+                    ['🌐','Works in any browser'],['⚡','Fast processing'],['🆓','Completely free']
+                  ].map(([ic,tx],i)=>(
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:8,
+                      color:'#475569',fontSize:13,fontWeight:600}}>
+                      <span style={{fontSize:17}}>{ic}</span>{tx}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ):(
+              <div style={{paddingTop:44}}>
+                <ToolPanel tool={active} onBack={()=>setActive(null)}/>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

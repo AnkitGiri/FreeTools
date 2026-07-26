@@ -1,1414 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <meta name="msvalidate.01" content="631CEEBAC4223D487B64FD4F37256A75" />
-  <title>PDF Studio — All-in-One free PDF Editor by Giritech Enetrprises</title>
-  <link href="favicon.ico" rel="icon" alt="Giritech">
-  <meta name="description" content="Free online PDF tools by Giritech Enterprises LLP. Merge, split, compress, convert, sign, protect, and secure PDF files online quickly and easily. 100% browser-based, private, and free to use." />
-  <!--<link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%236C63FF'/%3E%3Cstop offset='100%25' stop-color='%23EC4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Crect x='14' y='10' width='28' height='36' rx='4' fill='white' opacity='0.95'/%3E%3Cpath d='M33 10 L42 10 L42 19 L33 19Z' fill='%236C63FF' opacity='0.6'/%3E%3Crect x='18' y='23' width='18' height='2.5' rx='1.25' fill='%236C63FF' opacity='0.7'/%3E%3Crect x='18' y='29' width='18' height='2.5' rx='1.25' fill='%236C63FF' opacity='0.5'/%3E%3Crect x='18' y='35' width='11' height='2.5' rx='1.25' fill='%236C63FF' opacity='0.35'/%3E%3Ccircle cx='46' cy='50' r='14' fill='%23F7971E'/%3E%3Cpath d='M41 50 L44.5 53.5 L51 47' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
-  -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap"
-    rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Free Business Tools — Invoice, Business Card & More | Giritech</title>
+<meta name="description" content="100+ free online tools across PDF, Image, SEO, Developer, Finance & Business categories. 100% browser-based — your data never leaves your device."/>
+<meta name="robots" content="index, follow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/svg+xml" href="favicon.ico"/>
+<link rel="stylesheet" href="css/common.css"/>
+<style>
+  .hub-hero{min-height:78vh}
+  .hub-section{padding:20px 24px 100px;max-width:1140px;margin:0 auto}
+</style>
 
-<link rel="apple-touch-icon" sizes="57x57" href="./img/apple-touch-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="114x114" href="./img/apple-touch-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="72x72" href="./img/apple-touch-icon-72x72.png">    
-<link rel="apple-touch-icon" sizes="144x144" href="./img/apple-touch-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="60x60" href="./img/apple-touch-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="120x120" href="./img/apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="76x76" href="./img/apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="152x152" href="./img/apple-touch-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="./img/apple-touch-icon-180x180.png">
-  
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    html {
-      scroll-behavior: smooth
-    }
-
-    :root {
-      --bg: #07080F;
-      --bg2: #0D0F1C;
-      --bg3: #111827;
-      --surface: rgba(255, 255, 255, 0.04);
-      --border: rgba(255, 255, 255, 0.08);
-      --border2: rgba(255, 255, 255, 0.12);
-      --text: #F1F5F9;
-      --text2: #94A3B8;
-      --text3: #475569;
-      --purple: #6C63FF;
-      --pink: #EC4899;
-      --orange: #F7971E;
-      --cyan: #06B6D4;
-      --green: #10B981;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden
-    }
-
-    ::-webkit-scrollbar {
-      width: 5px
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #1E293B;
-      border-radius: 99px
-    }
-
-    input[type=range] {
-      -webkit-appearance: none;
-      height: 5px;
-      border-radius: 99px;
-      background: #1E293B;
-      outline: none;
-      cursor: pointer;
-      width: 100%
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #6C63FF, #EC4899);
-      cursor: pointer;
-      box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.2), 0 4px 12px rgba(108, 99, 255, 0.5)
-    }
-
-    /* ── Keyframes ── */
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(32px)
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0)
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0
-      }
-
-      to {
-        opacity: 1
-      }
-    }
-
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0) rotate(-2deg)
-      }
-
-      50% {
-        transform: translateY(-16px) rotate(2deg)
-      }
-    }
-
-    @keyframes spinSlow {
-      to {
-        transform: rotate(360deg)
-      }
-    }
-
-    @keyframes gradShift {
-      0% {
-        background-position: 0% 50%
-      }
-
-      50% {
-        background-position: 100% 50%
-      }
-
-      100% {
-        background-position: 0% 50%
-      }
-    }
-
-    @keyframes blob1 {
-
-      0%,
-      100% {
-        border-radius: 60% 40% 70% 30%/50% 60% 40% 70%;
-        transform: translate(0, 0)
-      }
-
-      33% {
-        border-radius: 40% 60% 30% 70%/60% 40% 70% 30%;
-        transform: translate(20px, -15px)
-      }
-
-      66% {
-        border-radius: 70% 30% 50% 50%/30% 70% 60% 40%;
-        transform: translate(-10px, 10px)
-      }
-    }
-
-    @keyframes blob2 {
-
-      0%,
-      100% {
-        border-radius: 40% 60% 60% 40%/60% 30% 70% 40%;
-        transform: translate(0, 0)
-      }
-
-      33% {
-        border-radius: 60% 40% 40% 60%/40% 60% 30% 70%;
-        transform: translate(-20px, 15px)
-      }
-
-      66% {
-        border-radius: 30% 70% 70% 30%/70% 30% 50% 50%;
-        transform: translate(15px, -10px)
-      }
-    }
-
-    @keyframes twinkle {
-
-      0%,
-      100% {
-        opacity: 0;
-        transform: scale(0.5)
-      }
-
-      50% {
-        opacity: 1;
-        transform: scale(1)
-      }
-    }
-
-    @keyframes scanLine {
-      0% {
-        transform: translateY(-100%)
-      }
-
-      100% {
-        transform: translateY(100vh)
-      }
-    }
-
-    @keyframes glow {
-
-      0%,
-      100% {
-        box-shadow: 0 0 20px rgba(108, 99, 255, 0.3)
-      }
-
-      50% {
-        box-shadow: 0 0 40px rgba(108, 99, 255, 0.6), 0 0 80px rgba(108, 99, 255, 0.2)
-      }
-    }
-
-    @keyframes borderGlow {
-
-      0%,
-      100% {
-        border-color: rgba(108, 99, 255, 0.3)
-      }
-
-      50% {
-        border-color: rgba(236, 72, 153, 0.5)
-      }
-    }
-
-    @keyframes countUp {
-      from {
-        opacity: 0;
-        transform: scale(0.7)
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1)
-      }
-    }
-
-    @keyframes ripple {
-      0% {
-        transform: scale(0);
-        opacity: 1
-      }
-
-      100% {
-        transform: scale(4);
-        opacity: 0
-      }
-    }
-
-    .fade-up {
-      animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both
-    }
-
-    .fade-in {
-      animation: fadeIn 0.5s ease both
-    }
-
-    /* ── Gradient text ── */
-    .grad {
-      background: linear-gradient(135deg, #6C63FF, #EC4899, #F7971E);
-      background-size: 200% 200%;
-      animation: gradShift 4s ease infinite;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text
-    }
-
-    .grad2 {
-      background: linear-gradient(90deg, #6C63FF, #06B6D4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text
-    }
-
-    /* ── Glass ── */
-    .glass {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08)
-    }
-
-    .glass2 {
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.06)
-    }
-
-    /* ── Nav ── */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 500;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 40px;
-      background: rgba(7, 8, 15, 0.85);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06)
-    }
-
-    @media(max-width:640px) {
-      nav {
-        padding: 0 16px
-      }
-    }
-
-    /* ── Hero ── */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 20px 60px;
-      position: relative;
-      overflow: hidden
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image: linear-gradient(rgba(108, 99, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(108, 99, 255, 0.05) 1px, transparent 1px);
-      background-size: 80px 80px;
-      mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%)
-    }
-
-    /* ── Tool card ── */
-    .tool-card {
-      border-radius: 20px;
-      padding: 28px 24px;
-      cursor: pointer;
-      text-align: left;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      background: rgba(255, 255, 255, 0.03);
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      width: 100%;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1)
-    }
-
-    .tool-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, var(--c, #6C63FF)08, transparent 60%);
-      opacity: 0;
-      transition: opacity 0.3s
-    }
-
-    .tool-card:hover {
-      transform: translateY(-6px);
-      border-color: var(--c, #6C63FF);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--c, #6C63FF)22, 0 0 40px var(--c, #6C63FF)12
-    }
-
-    .tool-card:hover::before {
-      opacity: 1
-    }
-
-    /* ── Pill ── */
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 14px;
-      border-radius: 99px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px
-    }
-
-    /* ── CTA button ── */
-    .cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 15px 36px;
-      border-radius: 99px;
-      border: none;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.25s;
-      position: relative;
-      overflow: hidden
-    }
-
-    .cta-primary {
-      background: linear-gradient(135deg, #6C63FF, #EC4899);
-      color: #fff;
-      box-shadow: 0 8px 32px rgba(108, 99, 255, 0.4)
-    }
-
-    .cta-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 48px rgba(108, 99, 255, 0.6)
-    }
-
-    .cta-primary:disabled {
-      background: #1E293B;
-      color: #475569;
-      cursor: not-allowed;
-      box-shadow: none;
-      transform: none
-    }
-
-    .cta-ghost {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text2);
-      border: 1px solid rgba(255, 255, 255, 0.1)
-    }
-
-    .cta-ghost:hover {
-      background: rgba(255, 255, 255, 0.09);
-      color: var(--text)
-    }
-
-    /* ── Input ── */
-    .inp {
-      width: 100%;
-      padding: 13px 16px;
-      border-radius: 12px;
-      border: 1.5px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-      font-family: 'Inter', sans-serif;
-      transition: border-color 0.2s, box-shadow 0.2s
-    }
-
-    .inp:focus {
-      border-color: #6C63FF;
-      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15)
-    }
-
-    .inp::placeholder {
-      color: var(--text3)
-    }
-
-    /* ── Status ── */
-    .ok {
-      padding: 13px 18px;
-      border-radius: 12px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      color: #34D399;
-      font-weight: 600;
-      font-size: 14px
-    }
-
-    .err {
-      padding: 13px 18px;
-      border-radius: 12px;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: #F87171;
-      font-weight: 600;
-      font-size: 14px
-    }
-
-    .info {
-      padding: 13px 18px;
-      border-radius: 12px;
-      background: rgba(108, 99, 255, 0.1);
-      border: 1px solid rgba(108, 99, 255, 0.25);
-      color: #A78BFA;
-      font-weight: 600;
-      font-size: 14px
-    }
-
-    /* ── Choice btn ── */
-    .ch {
-      flex: 1;
-      padding: 12px 6px;
-      border-radius: 12px;
-      border: 1.5px solid;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: all 0.2s
-    }
-
-    /* ── Glow orb ── */
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      pointer-events: none
-    }
-
-    /* ── Section heading ── */
-    .sec-label {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #6C63FF;
-      display: block;
-      margin-bottom: 10px
-    }
-
-    /* ── Stats ── */
-    .stat {
-      padding: 24px 32px;
-      border-radius: 20px;
-      text-align: center;
-      position: relative;
-      overflow: hidden
-    }
-
-    .stat::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(108, 99, 255, 0.08), rgba(236, 72, 153, 0.05));
-      border-radius: 20px
-    }
-
-    /* ── Footer ── */
-    footer {
-      background: #050609;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 72px 40px 36px
-    }
-
-    @media(max-width:640px) {
-      footer {
-        padding: 48px 20px 28px
-      }
-    }
-
-    /* ── Scan line effect ── */
-    .scanline {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.4), transparent);
-      animation: scanLine 6s linear infinite;
-      pointer-events: none
-    }
-
-    /* ── Back button ── */
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: none;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      cursor: pointer;
-      color: var(--text2);
-      font-weight: 600;
-      font-size: 14px;
-      padding: 10px 20px;
-      border-radius: 99px;
-      font-family: 'Inter', sans-serif;
-      transition: all 0.2s;
-      margin-bottom: 36px
-    }
-
-    .back-btn:hover {
-      color: var(--text);
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05)
-    }
-
-    /* ── Particle dot ── */
-    .dot {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: #6C63FF;
-      border-radius: 50%;
-      animation: twinkle var(--dur, 3s) var(--delay, 0s) ease-in-out infinite
-    }
-
-    /* ── Feature badge ── */
-    .badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 18px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.07)
-    }
-
-    /* HERO IMPROVEMENTS */
-    .hero {
-      padding-top: 110px !important
-    }
-
-    .hero h1 {
-      max-width: 900px !important;
-      margin: 0 auto 24px !important;
-      font-size: clamp(60px, 8vw, 100px) !important;
-      line-height: .92 !important;
-      letter-spacing: -4px !important;
-      font-weight: 800 !important;
-    }
-
-    .hero p {
-      max-width: 700px !important;
-      margin: 0 auto 40px !important;
-    }
-
-    .hero input {
-      max-width: 700px
-    }
-
-    .stat {
-      min-width: 140px !important
-    }
-
-
-    .hero {
-      min-height: 92vh !important;
-      text-align: center !important
-    }
-
-    .hero h1 {
-      font-family: 'Syne', sans-serif !important;
-      font-size: clamp(36px, 7vw, 72px) !important;
-      line-height: 1.06 !important;
-      letter-spacing: -2.5px !important;
-      max-width: 780px !important;
-      margin: 0 auto 22px !important
-    }
-
-    .hero p {
-      max-width: 540px !important;
-      margin: 0 auto 40px !important;
-      color: #475569 !important
-    }
-  </style>
-
-
-
-
-  <!--Anti-Popup-->
-  <script type="text/javascript" data-cfasync="false">
-    /*<![CDATA[/* */
-    (function () { var u = window, a = "c8e846d17657ecfffcb92e6693771556", i = [["siteId", 173 * 362 + 601 - 213 + 4983847], ["minBid", 0], ["popundersPerIP", "0"], ["delayBetween", 0], ["default", false], ["defaultPerDay", 0], ["topmostLayer", "auto"]], m = ["d3d3LmNkbjRhZHMuY29tL251c3dkcy5taW4uY3Nz", "ZDNnNW92Zm5nanc5YncuY2xvdWRmcm9udC5uZXQvTC9manF1ZXJ5LnNlcmlhbGl6ZU9iamVjdC5taW4uanM=", "d3d3LnNkZG10ZnhtcHdjbnRyLmNvbS9xdXN3ZHMubWluLmNzcw==", "d3d3Lnppd3B5bmFzbi5jb20vay9ranF1ZXJ5LnNlcmlhbGl6ZU9iamVjdC5taW4uanM="], w = -1, k, r, o = function () { clearTimeout(r); w++; if (m[w] && !(1806370330000 < (new Date).getTime() && 1 < w)) { k = u.document.createElement("script"); k.type = "text/javascript"; k.async = !0; var s = u.document.getElementsByTagName("script")[0]; k.src = "https://" + atob(m[w]); k.crossOrigin = "anonymous"; k.onerror = o; k.onload = function () { clearTimeout(r); u[a.slice(0, 16) + a.slice(0, 16)] || o() }; r = setTimeout(o, 5E3); s.parentNode.insertBefore(k, s) } }; if (!u[a]) { try { Object.freeze(u[a] = i) } catch (e) { } o() } })();
-    /*]]>/* */
-  </script>
-
-  <!--Popads-->
-  <script type="text/javascript" data-cfasync="false">
-    /*<![CDATA[/* */
-    (function () { var v = window, q = "c8e846d17657ecfffcb92e6693771556", y = [["siteId", 151 * 654 * 515 - 45811449], ["minBid", 0], ["popundersPerIP", "0"], ["delayBetween", 0], ["default", false], ["defaultPerDay", 0], ["topmostLayer", "auto"]], c = ["d3d3LmNkbjRhZHMuY29tL2d1c3dkcy5taW4uY3Nz", "ZDNnNW92Zm5nanc5YncuY2xvdWRmcm9udC5uZXQvR0pYL2VqcXVlcnkuc2VyaWFsaXplT2JqZWN0Lm1pbi5qcw=="], s = -1, w, e, g = function () { clearTimeout(e); s++; if (c[s] && !(1806370330000 < (new Date).getTime() && 1 < s)) { w = v.document.createElement("script"); w.type = "text/javascript"; w.async = !0; var n = v.document.getElementsByTagName("script")[0]; w.src = "https://" + atob(c[s]); w.crossOrigin = "anonymous"; w.onerror = g; w.onload = function () { clearTimeout(e); v[q.slice(0, 16) + q.slice(0, 16)] || g() }; e = setTimeout(g, 5E3); n.parentNode.insertBefore(w, n) } }; if (!v[q]) { try { Object.freeze(v[q] = y) } catch (e) { } g() } })();
-    /*]]>/* */
-  </script>
-
-<script>(function(s){s.dataset.zone='11109361',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </head>
-
 <body>
 
-  <div id="root">
-</div>
-  <script>
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'F12' || (e.ctrlKey && e.key === 'u') || (e.ctrlKey && e.key === 's') || (e.ctrlKey && e.shiftKey && e.key === 'I')) e.preventDefault();
-    });
-  </script>
-  <script type="text/babel">
-    const { useState, useRef, useEffect, useCallback } = React;
-    const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
-    const yr = new Date().getFullYear();
+<nav id="nav">
+  <a href="index.html" class="nav-brand">
+    <svg width="38" height="38" viewBox="0 0 64 64" fill="none">
+      <defs><linearGradient id="lg1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6C63FF"/><stop offset="100%" stop-color="#EC4899"/></linearGradient></defs>
+      <rect width="64" height="64" rx="18" fill="url(#lg1)"/><rect width="64" height="64" rx="18" fill="rgba(255,255,255,0.07)"/>
+      <text x="32" y="43" font-size="28" text-anchor="middle">⚡</text>
+    </svg>
+    <div class="nav-brand-text"><span class="nav-title">Free Tools Hub</span><span class="nav-sub">100+ Free Online Tools</span></div>
+  </a>
+  <div class="nav-pills">
+    <a href="https://www.giritech.co.in" class="pill pill-green">🏠 Home</a>
+    <span class="pill pill-purple">⚡ 100+ Tools</span>
+    <span class="pill pill-green">🔒 Private</span>
+    <span class="pill pill-orange">🆓 Free</span>
+  </div>
+</nav>
 
-    /* ── Helpers ── */
-    function dl(bytes, name, mime = 'application/pdf') {
-      const u = URL.createObjectURL(new Blob([bytes], { type: mime }));
-      const a = Object.assign(document.createElement('a'), { href: u, download: name });
-      document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(u); a.remove() }, 2000);
-    }
-    function readFile(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsArrayBuffer(f) }) }
-
-    /* ── PDF Processors ── */
-    async function doMerge(files) { const out = await PDFDocument.create(); for (const f of files) { const d = await PDFDocument.load(await readFile(f)); (await out.copyPages(d, d.getPageIndices())).forEach(p => out.addPage(p)) } return out.save() }
-    async function doSplit(file, at) { const buf = await readFile(file); const src = await PDFDocument.load(buf); const total = src.getPageCount(); let b = at.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0 && n < total); b = [0, ...b, total]; const parts = []; for (let i = 0; i < b.length - 1; i++) { const d = await PDFDocument.create(); (await d.copyPages(src, Array.from({ length: b[i + 1] - b[i] }, (_, j) => b[i] + j))).forEach(p => d.addPage(p)); parts.push({ bytes: await d.save(), name: `split-part-${i + 1}.pdf` }) } return parts }
-    async function doRotate(file, angle) { const d = await PDFDocument.load(await readFile(file)); d.getPages().forEach(p => p.setRotation(degrees((p.getRotation().angle + parseInt(angle)) % 360))); return d.save() }
-    async function doWatermark(file, text, opacity) { const d = await PDFDocument.load(await readFile(file)); const font = await d.embedFont(StandardFonts.HelveticaBold); d.getPages().forEach(p => { const { width, height } = p.getSize(); const sz = Math.min(width, height) * 0.1; p.drawText(text, { x: width / 2 - font.widthOfTextAtSize(text, sz) / 2, y: height / 2 - sz / 2, size: sz, font, color: rgb(0.6, 0.6, 0.6), opacity: opacity / 100, rotate: degrees(-30) }) }); return d.save() }
-    async function doPageNumbers(file, pos) { const d = await PDFDocument.load(await readFile(file)); const font = await d.embedFont(StandardFonts.Helvetica); d.getPages().forEach((p, i) => { const { width, height } = p.getSize(); const sz = 11; const tw = font.widthOfTextAtSize(`${i + 1}`, sz); const mg = 24; let x = pos.includes('left') ? mg : pos.includes('right') ? width - tw - mg : (width - tw) / 2; let y = pos.includes('top') ? height - mg - sz : mg; p.drawText(`${i + 1}`, { x, y, size: sz, font, color: rgb(0.4, 0.4, 0.4) }) }); return d.save() }
-    async function doCompress(file, level) { const d = await PDFDocument.load(await readFile(file), { updateMetadata: false }); return d.save({ useObjectStreams: level !== 'low' }) }
-    async function doConvertToImages(file) { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; const pdf = await pdfjsLib.getDocument({ data: await readFile(file) }).promise; const imgs = []; for (let i = 1; i <= pdf.numPages; i++) { const pg = await pdf.getPage(i); const vp = pg.getViewport({ scale: 2 }); const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height; await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise; imgs.push({ url: cv.toDataURL('image/jpeg', 0.92), name: `page-${i}.jpg` }) } return imgs }
-    async function doOCR(file, setSt) { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; const pdf = await pdfjsLib.getDocument({ data: await readFile(file) }).promise; let text = ''; for (let i = 1; i <= pdf.numPages; i++) { setSt(`Extracting page ${i}/${pdf.numPages}…`); const c = await (await pdf.getPage(i)).getTextContent(); text += `\n─── Page ${i} ───\n` + c.items.map(it => it.str).join(' ') } return text.trim() || 'No selectable text found.' }
-    async function doEdit(file, txt, col) { const d = await PDFDocument.load(await readFile(file)); const font = await d.embedFont(StandardFonts.Helvetica); const pg = d.getPage(0); const { height } = pg.getSize(); const [r, g, b] = col.match(/\w\w/g).map(x => parseInt(x, 16) / 255); pg.drawText(txt || 'Annotation', { x: 50, y: height - 60, size: 14, font, color: rgb(r, g, b) }); return d.save() }
-
-    /* ── Tools config ── */
-    const TOOLS = [
-      { id: 'merge', icon: '🔗', label: 'Merge PDFs', desc: 'Combine multiple PDFs into one', color: '#6C63FF', cat: 'Organize' },
-      { id: 'split', icon: '✂️', label: 'Split PDF', desc: 'Divide PDF into separate files', color: '#FF6584', cat: 'Organize' },
-      { id: 'compress', icon: '🗜️', label: 'Compress PDF', desc: 'Shrink file size, preserve quality', color: '#43C6AC', cat: 'Optimize' },
-      { id: 'convert', icon: '🔄', label: 'PDF → JPG', desc: 'Convert each page to a JPG image', color: '#F7971E', cat: 'Convert' },
-      { id: 'rotate', icon: '🔃', label: 'Rotate PDF', desc: 'Rotate pages to any angle', color: '#A855F7', cat: 'Organize' },
-      { id: 'watermark', icon: '💧', label: 'Watermark', desc: 'Stamp text watermark on all pages', color: '#06B6D4', cat: 'Edit' },
-      { id: 'pageno', icon: '📄', label: 'Page Numbers', desc: 'Add page numbers to your PDF', color: '#F43F5E', cat: 'Edit' },
-      { id: 'protect', icon: '🔒', label: 'Protect PDF', desc: 'Password-protect your document', color: '#3B82F6', cat: 'Security' },
-      { id: 'unlock', icon: '🔓', label: 'Unlock PDF', desc: 'Remove PDF password & restrictions', color: '#10B981', cat: 'Security' },
-      { id: 'sign', icon: '🖊️', label: 'Sign PDF', desc: 'Draw & embed your signature', color: '#EC4899', cat: 'Edit' },
-      { id: 'edit', icon: '✏️', label: 'Annotate PDF', desc: 'Add text annotations to any page', color: '#8B5CF6', cat: 'Edit' },
-      { id: 'ocr', icon: '🔍', label: 'Extract Text', desc: 'Extract selectable text from PDFs', color: '#F59E0B', cat: 'Convert' },
-    ];
-    const CATS = [...new Set(TOOLS.map(t => t.cat))];
-    const CAT_ICONS = { Organize: '📁', Optimize: '⚡', Convert: '🔄', Edit: '✏️', Security: '🛡️' };
-
-    /* ── SVG Logo ── */
-    function Logo({ size = 36 }) {
-      return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-          <defs>
-            <linearGradient id="lg1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#6C63FF" /><stop offset="100%" stopColor="#EC4899" />
-            </linearGradient>
-            <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#F7971E" /><stop offset="100%" stopColor="#EC4899" />
-            </linearGradient>
-            <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-          </defs>
-          <rect width="64" height="64" rx="18" fill="url(#lg1)" />
-          <rect width="64" height="64" rx="18" fill="rgba(255,255,255,0.08)" />
-          <rect x="13" y="10" width="28" height="36" rx="5" fill="white" opacity="0.97" filter="url(#glow)" />
-          <path d="M32 10 L41 10 L41 19 L32 19Z" fill="#6C63FF" opacity="0.55" />
-          <path d="M41 10 L41 19 L32 19" stroke="rgba(108,99,255,0.3)" strokeWidth="1" fill="none" />
-          <rect x="17" y="23" width="20" height="2.5" rx="1.25" fill="#6C63FF" opacity="0.75" />
-          <rect x="17" y="28.5" width="20" height="2.5" rx="1.25" fill="#6C63FF" opacity="0.55" />
-          <rect x="17" y="34" width="13" height="2.5" rx="1.25" fill="#6C63FF" opacity="0.35" />
-          <circle cx="46" cy="50" r="14" fill="url(#lg2)" />
-          <path d="M40.5 50 L44.5 54 L51.5 47" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      );
-    }
+<section class="hero hub-hero" id="hero">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-orb orb1" aria-hidden="true"></div>
+  <div class="hero-orb orb2" aria-hidden="true"></div>
+  <div class="hero-orb orb3" aria-hidden="true"></div>
+  <div class="scanline" aria-hidden="true"></div>
+  <div id="particles" aria-hidden="true"></div>
+  <div class="hero-content">
     
-    /* ── Particle background ── */
-    function Particles() {
-      const dots = Array.from({ length: 28 }, (_, i) => ({
-        id: i, top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`,
-        dur: `${2.5 + Math.random() * 4}s`, delay: `${Math.random() * 5}s`,
-        size: Math.random() > 0.7 ? 3 : 2, opacity: 0.3 + Math.random() * 0.5
-      }));
-      return (
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          {dots.map(d => (
-            <div key={d.id} className="dot" style={{
-              top: d.top, left: d.left, '--dur': d.dur, '--delay': d.delay,
-              width: d.size, height: d.size, opacity: d.opacity,
-              background: `hsl(${240 + Math.random() * 60},80%,75%)`
-            }} />
-          ))}
+    <div class="fade-up"><span class="hero-badge">✨ 100+ Free Tools · Zero Sign-Up · 100% Browser-Based</span></div>
+    <h1 class="hero-h1 fade-up" style="animation-delay:.08s">Every Tool You Need,<br><span class="grad">All In One Place</span></h1>
+    <p class="hero-sub fade-up" style="animation-delay:.16s">PDF, Image, SEO, Developer, Finance &amp; Business tools — <strong>all free, all in your browser.</strong> Nothing is ever uploaded to a server.</p>
+    
+    <div class="stats-row fade-up" style="animation-delay:.32s">
+      <div class="stat-card"><span class="stat-num" style="color:#6C63FF">100+</span><span class="stat-label">Free Tools</span></div>
+      <div class="stat-card"><span class="stat-num" style="color:#10B981">6</span><span class="stat-label">Categories</span></div>
+      <div class="stat-card"><span class="stat-num" style="color:#F7971E">0 KB</span><span class="stat-label">Uploaded</span></div>
+      <div class="stat-card"><span class="stat-num" style="color:#EC4899">Free</span><span class="stat-label">Forever</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="hub-section">
+  <div class="section-intro">
+    <script>
+  atOptions = {
+    'key' : '66d1f62cbae90c1e1eac0607a9b87f4a',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/66d1f62cbae90c1e1eac0607a9b87f4a/invoke.js"></script>
+<br><br>
+    <span class="sec-label">Choose a category</span>
+    <h2 class="section-h2">Six toolkits, <span class="grad2">one destination</span></h2>
+  </div>
+
+  <div class="hub-grid">
+    <a href="pdf-tools.html" class="hub-card" style="--tc:#6C63FF">
+      <div class="hub-card-icon" style="background:linear-gradient(135deg,#6C63FF30,#6C63FF10);border:1px solid #6C63FF40">📄</div>
+      <div class="hub-card-title">PDF Tools</div>
+      <div class="hub-card-desc">Merge, split, compress, convert, watermark, sign &amp; rotate PDFs.</div>
+      <span class="hub-card-count" style="background:#6C63FF20;color:#A78BFA">20+ tools →</span>
+    </a>
+
+    <a href="image-tools.html" class="hub-card" style="--tc:#F97316">
+      <div class="hub-card-icon" style="background:linear-gradient(135deg,#F9731630,#F9731610);border:1px solid #F9731640">🖼️</div>
+      <div class="hub-card-title">Image Tools</div>
+      <div class="hub-card-desc">Resize, compress, crop, convert, watermark &amp; filter images.</div>
+      <span class="hub-card-count" style="background:#F9731620;color:#FDBA74">16+ tools →</span>
+    </a>
+
+    <a href="seo-tools.html" class="hub-card" style="--tc:#10B981">
+      <div class="hub-card-icon" style="background:linear-gradient(135deg,#10B98130,#10B98110);border:1px solid #10B98140">📈</div>
+      <div class="hub-card-title">SEO Tools</div>
+      <div class="hub-card-desc">Meta tags, sitemaps, schema markup &amp; keyword analysis.</div>
+      <span class="hub-card-count" style="background:#10B98120;color:#34D399">16+ tools →</span>
+    </a>
+
+    <a href="dev-tools.html" class="hub-card" style="--tc:#3B82F6">
+      <div class="hub-card-icon" style="background:linear-gradient(135deg,#3B82F630,#3B82F610);border:1px solid #3B82F640">💻</div>
+      <div class="hub-card-title">Developer Tools</div>
+      <div class="hub-card-desc">JSON, Base64, hashes, regex, JWT, QR codes &amp; more.</div>
+      <span class="hub-card-count" style="background:#3B82F620;color:#93C5FD">22+ tools →</span>
+    </a>
+
+    <a href="finance-tools.html" class="hub-card" style="--tc:#EAB308">
+      <div class="hub-card-icon" style="background:linear-gradient(135deg,#EAB30830,#EAB30810);border:1px solid #EAB30840">💰</div>
+      <div class="hub-card-title">Finance Calculators</div>
+      <div class="hub-card-desc">EMI, SIP, mortgage, retirement, currency &amp; tax calculators.</div>
+      <span class="hub-card-count" style="background:#EAB30820;color:#FDE047">16+ tools →</span>
+    </a>
+
+    <a href="business-tools.html" class="hub-card" style="--tc:#F43F5E">
+      <div class="hub-card-icon" style="background:linear-gradient(135deg,#F43F5E30,#F43F5E10);border:1px solid #F43F5E40">💼</div>
+      <div class="hub-card-title">Business Tools</div>
+      <div class="hub-card-desc">Invoices, business cards, ROI &amp; salary slip generators.</div>
+      <span class="hub-card-count" style="background:#F43F5E20;color:#FDA4AF">12+ tools →</span>
+    </a>
+    <a href="https://omg10.com/4/11412892" target="_blank" rel="noopener noreferrer" style="color:#f7f2f2; text-align: center;",>Click here to visit our affiliate link</a>
+  </div>
+  
+</section>
+
+<section class="trust-strip">
+  <div class="trust-inner">
+    <script async="async" data-cfasync="false" src="https://pl30539934.effectivecpmnetwork.com/69bb447befc1f5a0e4f8febb022dc40a/invoke.js"></script>
+<div id="container-69bb447befc1f5a0e4f8febb022dc40a"></div>
+    <div class="badge-item"><span>🔒</span><span>256-bit SSL</span></div>
+    <div class="badge-item"><span>🚫</span><span>Nothing Uploaded</span></div>
+    <div class="badge-item"><span>⚡</span><span>Instant Results</span></div>
+    <div class="badge-item"><span>🌐</span><span>Any Browser</span></div>
+    <div class="badge-item"><span>🆓</span><span>Always Free</span></div>
+    <div class="badge-item"><span>📱</span><span>Mobile Friendly</span></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo-wrap">
+          <svg width="40" height="40" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="18" fill="url(#lg1)"/><rect width="64" height="64" rx="18" fill="rgba(255,255,255,0.07)"/><text x="32" y="43" font-size="28" text-anchor="middle">⚡</text></svg>
+          <div><div class="footer-brand-name">Free Tools Hub</div><div class="footer-brand-sub">100+ Free Online Tools</div></div>
         </div>
-      );
-    }
+        <p class="footer-desc">Free, fast &amp; completely private. Everything runs in your browser — no accounts, no limits.</p>
+        <div class="footer-tags"><span class="ftag">🔒 Secure</span><span class="ftag">⚡ Fast</span><span class="ftag">🆓 Free</span></div>
+      </div>
+      <div>
+        <h3 class="footer-col-title" style="color:#6C63FF">Categories</h3>
+        <ul class="footer-list">
+          <li onclick="location.href='pdf-tools.html'"><span class="ficon" style="background:rgba(108,99,255,0.12)">📄</span>PDF Tools</li>
+          <li onclick="location.href='image-tools.html'"><span class="ficon" style="background:rgba(108,99,255,0.12)">🖼️</span>Image Tools</li>
+          <li onclick="location.href='seo-tools.html'"><span class="ficon" style="background:rgba(108,99,255,0.12)">📈</span>SEO Tools</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="footer-col-title" style="color:#EC4899">More</h3>
+        <ul class="footer-list">
+          <li onclick="location.href='dev-tools.html'"><span class="ficon" style="background:rgba(236,72,153,0.12)">💻</span>Developer Tools</li>
+          <li onclick="location.href='finance-tools.html'"><span class="ficon" style="background:rgba(236,72,153,0.12)">💰</span>Finance Calculators</li>
+          <li onclick="location.href='business-tools.html'"><span class="ficon" style="background:rgba(236,72,153,0.12)">💼</span>Business Tools</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="footer-col-title" style="color:#10B981">Privacy</h3>
+        <ul class="footer-list">
+          <li><span class="ficon" style="background:rgba(16,185,129,0.12)">🔒</span>No file uploads</li>
+          <li><span class="ficon" style="background:rgba(16,185,129,0.12)">👁️</span>No tracking</li>
+          <li><span class="ficon" style="background:rgba(16,185,129,0.12)">🗑️</span>Nothing stored</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© <span id="yr"></span> <span class="footer-brand-grad">Giritech Enterprises LLP</span>. All rights reserved.</p>
+      <nav class="footer-links"><a href="https://www.giritech.co.in/privacy">Privacy Policy</a><a href="https://www.giritech.co.in/t&c">Terms of Use</a><a href="https://www.giritech.co.in/contact">Contact</a></nav>
+    </div>
+  </div>
+</footer>
 
-    /* ── Drop Zone ── */
-    function DropZone({ onFiles, multiple, label, color = '#6C63FF' }) {
-      const [drag, setDrag] = useState(false); const ref = useRef();
-      const handle = f => { if (f.length) onFiles(multiple ? f : [f[0]]) };
-      return (
-        <div
-          onDragOver={e => { e.preventDefault(); setDrag(true) }}
-          onDragLeave={() => setDrag(false)}
-          onDrop={e => { e.preventDefault(); setDrag(false); handle(Array.from(e.dataTransfer.files)) }}
-          onClick={() => ref.current.click()}
-          style={{
-            border: `2px dashed ${drag ? color : 'rgba(255,255,255,0.12)'}`,
-            borderRadius: 20, padding: '48px 28px', textAlign: 'center', cursor: 'pointer',
-            background: drag ? `${color}0A` : 'rgba(255,255,255,0.02)',
-            transition: 'all 0.3s', position: 'relative', overflow: 'hidden'
-          }}>
-          <input ref={ref} type="file" accept=".pdf,application/pdf" multiple={multiple}
-            style={{ display: 'none' }} onChange={e => handle(Array.from(e.target.files))} />
-          {drag && <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at center,${color}15,transparent)`, pointerEvents: 'none' }} />}
-          <div style={{ fontSize: 52, marginBottom: 14, filter: `drop-shadow(0 4px 12px ${color}60)` }}>📂</div>
-          <div style={{ fontWeight: 700, fontSize: 17, color: '#F1F5F9', marginBottom: 6 }}>{label || 'Drop PDF here'}</div>
-          <div style={{ fontSize: 13, color: '#475569', marginBottom: 20 }}>or click to browse from your device</div>
-          <button style={{
-            padding: '10px 28px', borderRadius: 99, border: 'none', fontFamily: 'Inter,sans-serif',
-            background: `linear-gradient(135deg,${color},#EC4899)`, color: '#fff', fontWeight: 700,
-            fontSize: 13, cursor: 'pointer', boxShadow: `0 4px 20px ${color}40`
-          }}>
-            Choose File{multiple ? 's' : ''}
-          </button>
-        </div>
-      );
-    }
-
-    /* ── Signature Pad ── */
-    function SigPad({ onSave, color }) {
-      const cv = useRef(); const [drawing, setDrawing] = useState(false); const last = useRef(null);
-      const pos = e => { const r = cv.current.getBoundingClientRect(); const s = e.touches ? e.touches[0] : e; return [s.clientX - r.left, s.clientY - r.top] };
-      const start = e => { setDrawing(true); last.current = pos(e) };
-      const move = e => { if (!drawing) return; const ctx = cv.current.getContext('2d'); const [x, y] = pos(e); ctx.strokeStyle = '#F1F5F9'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(...last.current); ctx.lineTo(x, y); ctx.stroke(); last.current = [x, y] };
-      const end = () => setDrawing(false);
-      const clear = () => cv.current.getContext('2d').clearRect(0, 0, cv.current.width, cv.current.height);
-      return (
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 13, color: '#94A3B8', marginBottom: 10 }}>Draw your signature below</div>
-          <canvas ref={cv} width={520} height={140}
-            onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
-            onTouchStart={e => { e.preventDefault(); start(e) }} onTouchMove={e => { e.preventDefault(); move(e) }} onTouchEnd={end}
-            style={{
-              border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '100%', height: 140,
-              cursor: 'crosshair', background: 'rgba(255,255,255,0.03)', touchAction: 'none', display: 'block'
-            }} />
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-            <button onClick={clear} className="cta cta-ghost" style={{ flex: 1, padding: '10px', fontSize: 13 }}>🗑 Clear</button>
-            <button onClick={() => onSave(cv.current.toDataURL('image/png'))}
-              style={{
-                flex: 2, padding: '10px', borderRadius: 12, border: 'none',
-                background: `linear-gradient(135deg,${color},#A18CD1)`,
-                color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Inter,sans-serif'
-              }}>
-              ✅ Use This Signature
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    /* ── Tool Panel ── */
-    function ToolPanel({ tool, onBack }) {
-      const [files, setFiles] = useState([]);
-      const [busy, setBusy] = useState(false);
-      const [status, setStatus] = useState('');
-      const [error, setError] = useState('');
-      const [results, setResults] = useState([]);
-      const [text, setText] = useState('');
-      const [sigDone, setSigDone] = useState(false);
-      const [s, setS] = useState({ password: '', confirm: '', waterText: 'CONFIDENTIAL', waterOpacity: 50, rotate: '90', splitPages: '', compress: 'medium', pagePos: 'bottom-center', ocrLang: 'eng', annotText: '', annotColor: '#FFD700' });
-      const set = (k, v) => setS(p => ({ ...p, [k]: v }));
-      const addFiles = f => setFiles(tool.id === 'merge' ? p => [...p, ...f] : f);
-      const rm = i => setFiles(p => p.filter((_, j) => j !== i));
-
-      const ch = (active, label, onClick) => (
-        <button onClick={onClick} className="ch"
-          style={{
-            borderColor: active ? tool.color : 'rgba(255,255,255,0.1)',
-            background: active ? `${tool.color}20` : 'rgba(255,255,255,0.03)',
-            color: active ? tool.color : '#64748B'
-          }}>
-          {label}
-        </button>
-      );
-
-      const run = async () => {
-        if (!files.length) return;
-        setBusy(true); setError(''); setResults([]); setText(''); setStatus('Processing…');
-        try {
-          switch (tool.id) {
-            case 'merge': dl(await doMerge(files), 'merged.pdf'); setStatus('✅ Merged & downloaded!'); break;
-            case 'split': { const ps = await doSplit(files[0], s.splitPages || ''); for (const p of ps) { dl(p.bytes, p.name); await new Promise(r => setTimeout(r, 400)) } setStatus(`✅ Split into ${ps.length} file${ps.length > 1 ? 's' : ''}!`); break }
-            case 'compress': dl(await doCompress(files[0], s.compress), `compressed-${files[0].name}`); setStatus('✅ Compressed & downloaded!'); break;
-            case 'rotate': dl(await doRotate(files[0], s.rotate), `rotated-${files[0].name}`); setStatus('✅ Rotated & downloaded!'); break;
-            case 'watermark': dl(await doWatermark(files[0], s.waterText || 'WATERMARK', s.waterOpacity), `watermarked-${files[0].name}`); setStatus('✅ Watermark added & downloaded!'); break;
-            case 'pageno': dl(await doPageNumbers(files[0], s.pagePos), `numbered-${files[0].name}`); setStatus('✅ Page numbers added & downloaded!'); break;
-            case 'convert': { const imgs = await doConvertToImages(files[0]); setResults(imgs); setStatus(`✅ ${imgs.length} page${imgs.length > 1 ? 's' : ''} converted!`); break }
-            case 'ocr': { const t = await doOCR(files[0], setStatus); setText(t); setStatus('✅ Text extracted!'); break }
-            case 'edit': dl(await doEdit(files[0], s.annotText, s.annotColor), `annotated-${files[0].name}`); setStatus('✅ Annotation added & downloaded!'); break;
-            case 'protect': setError('PDF encryption requires a server-side tool. Use ilovepdf.com or smallpdf.com.'); break;
-            case 'unlock': setError('Removing encryption requires a server-side tool. Use ilovepdf.com or smallpdf.com.'); break;
-            case 'sign': setError('Draw your signature above and click "Use This Signature".'); break;
-            default: setError('Tool not yet implemented.');
-          }
-        } catch (e) { console.error(e); setError(e.message || 'Something went wrong.'); setStatus('') }
-        setBusy(false);
-      };
-
-      const embedSig = async (dataUrl) => {
-        if (!files.length) { setError('Upload a PDF first.'); return }
-        setBusy(true); setStatus('Embedding signature…'); setError('');
-        try {
-          const d = await PDFDocument.load(await readFile(files[0]));
-          const img = await d.embedPng(Uint8Array.from(atob(dataUrl.split(',')[1]), c => c.charCodeAt(0)));
-          const pg = d.getPage(0); const { width, height } = pg.getSize();
-          pg.drawImage(img, { x: width - 230, y: 30, width: 190, height: 65 });
-          dl(await d.save(), `signed-${files[0].name}`);
-          setStatus('✅ Signed & downloaded!'); setSigDone(true);
-        } catch (e) { setError(e.message) }
-        setBusy(false);
-      };
-
-      return (
-        <div style={{ maxWidth: 600, margin: '0 auto' }}>
-          <button className="back-btn" onClick={onBack}>← Back to all tools</button>
-
-          {/* Tool hero header */}
-          <div style={{
-            borderRadius: 24, padding: '32px', marginBottom: 32, position: 'relative', overflow: 'hidden',
-            background: `linear-gradient(135deg,${tool.color}18,rgba(255,255,255,0.02))`,
-            border: `1px solid ${tool.color}30`
-          }}>
-            <div style={{
-              position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%',
-              background: `radial-gradient(circle,${tool.color}20,transparent 70%)`
-            }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              <div style={{
-                width: 72, height: 72, borderRadius: 22, background: `${tool.color}22`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, flexShrink: 0,
-                boxShadow: `0 8px 32px ${tool.color}30,inset 0 1px 0 rgba(255,255,255,0.1)`
-              }}>
-                {tool.icon}
-              </div>
-              <div>
-                <span style={{
-                  fontSize: 10, fontWeight: 800, letterSpacing: 2, color: tool.color,
-                  textTransform: 'uppercase', display: 'block', marginBottom: 6
-                }}>{tool.cat}</span>
-                <h2 style={{ fontFamily: 'Syne,Inter,sans-serif', margin: 0, fontWeight: 800, fontSize: 26, color: '#F1F5F9', lineHeight: 1.1 }}>{tool.label}</h2>
-                <p style={{ margin: '6px 0 0', color: '#64748B', fontSize: 14 }}>{tool.desc}</p>
-              </div>
-            </div>
-          </div>
-
-          <DropZone onFiles={addFiles} multiple={tool.id === 'merge'} color={tool.color}
-            label={tool.id === 'merge' ? 'Drop multiple PDFs to merge' : 'Drop your PDF here'} />
-
-          {files.length > 0 && (
-            <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {files.map((f, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                  borderRadius: 99, background: `${tool.color}15`, border: `1px solid ${tool.color}30`
-                }}>
-                  <span>📄</span>
-                  <span style={{
-                    fontSize: 13, fontWeight: 600, color: '#C4B5FD', maxWidth: 140,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                  }}>{f.name}</span>
-                  <span style={{ fontSize: 11, color: '#475569' }}>{(f.size / 1024).toFixed(0)}KB</span>
-                  <button onClick={() => rm(i)} style={{
-                    border: 'none', background: 'none', cursor: 'pointer',
-                    color: '#475569', fontSize: 14, padding: 0, lineHeight: 1
-                  }}>✕</button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Settings */}
-          <div style={{ marginTop: 28 }}>
-            {tool.id === 'merge' && files.length > 1 && (
-              <div style={{ borderRadius: 16, padding: 20, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: tool.color, textTransform: 'uppercase', marginBottom: 14 }}>Merge Order ({files.length} files)</div>
-                {files.map((f, i) => (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-                    borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 8
-                  }}>
-                    <span style={{ width: 24, height: 24, borderRadius: 8, background: tool.color + '30', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: tool.color, flexShrink: 0 }}>{i + 1}</span>
-                    <span style={{ fontSize: 16 }}>📄</span>
-                    <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#CBD5E1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
-                    <button onClick={() => rm(i)} style={{ border: 'none', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', color: '#64748B', fontSize: 13, padding: '4px 8px', borderRadius: 6 }}>✕</button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {tool.id === 'split' && (
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 8 }}>Split at page numbers (e.g. 3,6)</label>
-                <input className="inp" type="text" placeholder="3,6 — leave blank to split every page" value={s.splitPages} onChange={e => set('splitPages', e.target.value)} />
-              </div>
-            )}
-
-            {tool.id === 'compress' && (
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 12 }}>Compression Level</div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  {ch(s.compress === 'low', '🟡 Low', () => set('compress', 'low'))}
-                  {ch(s.compress === 'medium', '🟠 Medium', () => set('compress', 'medium'))}
-                  {ch(s.compress === 'high', '🔴 High', () => set('compress', 'high'))}
-                </div>
-                <div style={{ marginTop: 12, padding: '11px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', fontSize: 12, color: '#64748B' }}>
-                  {s.compress === 'low' ? 'Minimal compression — best visual quality' : s.compress === 'medium' ? 'Balanced size & quality (recommended)' : 'Maximum compression — smallest possible file'}
-                </div>
-              </div>
-            )}
-
-            {tool.id === 'rotate' && (
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 12 }}>Rotation Angle</div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  {['90', '180', '270', '-90'].map(d => ch(s.rotate === d, d + '°', () => set('rotate', d)))}
-                </div>
-                <div style={{
-                  textAlign: 'center', marginTop: 20, fontSize: 48, filter: `drop-shadow(0 8px 20px ${tool.color}50)`,
-                  transform: `rotate(${s.rotate}deg)`, transition: 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1)', display: 'inline-block', width: '100%'
-                }}>
-                  📄
-                </div>
-              </div>
-            )}
-
-            {tool.id === 'watermark' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 8 }}>Watermark Text</label>
-                  <input className="inp" type="text" placeholder="e.g. CONFIDENTIAL" value={s.waterText} onChange={e => set('waterText', e.target.value)} />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <label style={{ fontWeight: 700, fontSize: 13, color: '#94A3B8' }}>Opacity</label>
-                    <span style={{ fontWeight: 800, fontSize: 13, color: tool.color }}>{s.waterOpacity}%</span>
-                  </div>
-                  <input type="range" min={10} max={100} value={s.waterOpacity} onChange={e => set('waterOpacity', +e.target.value)} />
-                </div>
-                <div style={{ padding: '28px 20px', borderRadius: 16, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 90, position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)', backgroundSize: '20px 20px' }} />
-                  <span style={{ fontSize: 20, fontWeight: 900, color: '#94A3B8', letterSpacing: 5, opacity: s.waterOpacity / 100, transform: 'rotate(-25deg)', display: 'block', position: 'relative' }}>{s.waterText || 'WATERMARK'}</span>
-                  <span style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 10, color: '#1E293B', fontWeight: 600 }}>PREVIEW</span>
-                </div>
-              </div>
-            )}
-
-            {tool.id === 'pageno' && (
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 14 }}>Page Number Position</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                  {['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'].map(p => (
-                    <button key={p} onClick={() => set('pagePos', p)} style={{
-                      padding: '11px 4px', borderRadius: 12, border: '1.5px solid', fontFamily: 'Inter,sans-serif',
-                      borderColor: s.pagePos === p ? tool.color : 'rgba(255,255,255,0.08)',
-                      background: s.pagePos === p ? `${tool.color}18` : 'rgba(255,255,255,0.02)',
-                      color: s.pagePos === p ? tool.color : '#64748B', fontWeight: 600, fontSize: 11,
-                      cursor: 'pointer', textTransform: 'capitalize', transition: 'all 0.2s'
-                    }}>
-                      {p.replace('-', ' ')}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tool.id === 'edit' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 8 }}>Annotation Text</label>
-                  <input className="inp" type="text" placeholder="Type your annotation…" value={s.annotText} onChange={e => set('annotText', e.target.value)} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <label style={{ fontWeight: 700, fontSize: 13, color: '#94A3B8' }}>Color</label>
-                  <input type="color" value={s.annotColor} onChange={e => set('annotColor', e.target.value)}
-                    style={{ width: 52, height: 40, border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: 3, cursor: 'pointer', background: 'transparent' }} />
-                  <div style={{
-                    padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.08)', fontSize: 13, color: s.annotColor, fontWeight: 700
-                  }}>
-                    {s.annotColor}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {tool.id === 'sign' && <SigPad onSave={embedSig} color={tool.color} />}
-
-            {(tool.id === 'protect' || tool.id === 'unlock') && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 8 }}>{tool.id === 'protect' ? 'Set Password' : 'PDF Password'}</label>
-                  <input className="inp" type="password" placeholder={tool.id === 'protect' ? 'Enter a strong password' : 'Enter PDF password to unlock'} value={s.password} onChange={e => set('password', e.target.value)} />
-                </div>
-                {tool.id === 'protect' && <div>
-                  <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 8 }}>Confirm Password</label>
-                  <input className="inp" type="password" placeholder="Re-enter password" value={s.confirm} onChange={e => set('confirm', e.target.value)} />
-                </div>}
-              </div>
-            )}
-
-            {tool.id === 'ocr' && (
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: 13, color: '#94A3B8', marginBottom: 8 }}>Document Language</label>
-                <select className="inp" value={s.ocrLang} onChange={e => set('ocrLang', e.target.value)} style={{ cursor: 'pointer' }}>
-                  {[['eng', 'English'], ['hin', 'Hindi'], ['fra', 'French'], ['deu', 'German'], ['spa', 'Spanish'], ['por', 'Portuguese'], ['ara', 'Arabic'], ['jpn', 'Japanese']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-                <div style={{ marginTop: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.18)', fontSize: 12, color: '#D97706' }}>
-                  💡 Works best on text-based PDFs. Scanned images may return limited results.
-                </div>
-              </div>
-            )}
-          </div>
-
-          {tool.id !== 'sign' && (
-            <button className="cta cta-primary" disabled={!files.length || busy} onClick={run}
-              style={{
-                marginTop: 28, width: '100%', fontSize: 16, padding: '17px', borderRadius: 16,
-                background: files.length && !busy ? `linear-gradient(135deg,${tool.color},#EC4899)` : undefined
-              }}>
-              {busy ? <>⏳ Working…</> : <>{tool.icon} {tool.label}</>}
-            </button>
-          )}
-
-          {status && <div className={status.startsWith('✅') ? 'ok' : 'info'} style={{ marginTop: 16 }}>{status}</div>}
-          {error && <div className="err" style={{ marginTop: 16 }}>⚠️ {error}</div>}
-          {sigDone && <div className="ok" style={{ marginTop: 16 }}>✅ Signature embedded & downloaded!</div>}
-
-          {text && (
-            <div style={{ marginTop: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: '#94A3B8' }}>Extracted Text</span>
-                <button onClick={() => { const b = new Blob([text], { type: 'text/plain' }); const u = URL.createObjectURL(b); Object.assign(document.createElement('a'), { href: u, download: 'extracted.txt' }).click(); URL.revokeObjectURL(u) }}
-                  style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#F59E0B,#F7971E)', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
-                  ⬇ Download .txt
-                </button>
-              </div>
-              <textarea readOnly value={text} style={{ width: '100%', height: 200, padding: '14px', borderRadius: 14, border: '1.5px solid rgba(255,255,255,0.08)', fontSize: 13, color: '#CBD5E1', resize: 'vertical', fontFamily: 'monospace', background: 'rgba(255,255,255,0.02)', boxSizing: 'border-box' }} />
-            </div>
-          )}
-
-          {results.length > 0 && (
-            <div style={{ marginTop: 24 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: '#94A3B8', marginBottom: 14 }}>{results.length} Page{results.length > 1 ? 's' : ''} Converted</div>
-              {results.map((r, i) => (
-                <div key={i} style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 14, position: 'relative' }}>
-                  <img src={r.url} alt={r.name} style={{ width: '100%', display: 'block' }} />
-                  <a href={r.url} download={r.name} style={{ position: 'absolute', top: 12, right: 12, padding: '8px 18px', borderRadius: 10, background: 'rgba(0,0,0,0.75)', color: '#fff', fontWeight: 700, fontSize: 12, textDecoration: 'none', backdropFilter: 'blur(8px)' }}>⬇ Download</a>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    /* ── Tool Card ── */
-    function ToolCard({ tool, onClick }) {
-      return (
-        <button className="tool-card" onClick={onClick} style={{ '--c': tool.color }}>
-          <div style={{ position: 'absolute', top: -32, right: -32, width: 120, height: 120, borderRadius: '50%', background: `radial-gradient(circle,${tool.color}20,transparent 70%)`, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -20, left: -20, width: 80, height: 80, borderRadius: '50%', background: `radial-gradient(circle,${tool.color}10,transparent 70%)`, pointerEvents: 'none' }} />
-          <div style={{ width: 54, height: 54, borderRadius: 16, background: `linear-gradient(135deg,${tool.color}25,${tool.color}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, marginBottom: 18, border: `1px solid ${tool.color}30`, boxShadow: `0 4px 20px ${tool.color}25` }}>
-            {tool.icon}
-          </div>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.8, color: tool.color, textTransform: 'uppercase', marginBottom: 6 }}>{tool.cat}</div>
-          <div style={{ fontFamily: 'Syne,Inter,sans-serif', fontWeight: 700, fontSize: 16, color: '#F1F5F9', marginBottom: 8, lineHeight: 1.3 }}>{tool.label}</div>
-          <div style={{ fontSize: 12.5, color: '#475569', lineHeight: 1.65, marginBottom: 20 }}>{tool.desc}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: tool.color }}>
-            Open tool
-            <span style={{ width: 22, height: 22, borderRadius: '50%', background: `${tool.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, border: `1px solid ${tool.color}40` }}>→</span>
-          </div>
-        </button>
-      );
-    }
-                   
-    /* ── Footer ── */
-    function Footer() {
-      return (
-        <footer>
-          <div style={{ maxWidth: 1160, margin: '0 auto' }}>
-            {/* Top grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 48, paddingBottom: 56, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              {/* Brand */}
-              <div style={{ gridColumn: 'span 1' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-                  <Logo size={44} />
-                  <div>
-                    <div style={{ fontFamily: 'Syne,Inter,sans-serif', fontWeight: 800, fontSize: 20, color: '#F1F5F9' }}>PDF Studio</div>
-                    <div style={{ fontSize: 11, color: '#334155', letterSpacing: 0.5 }}>All-in-One PDF Editor</div>
-                  </div>
-                </div>
-                <p style={{ fontSize: 13, color: '#334155', lineHeight: 1.8, maxWidth: 260 }}>
-                  Free, fast & completely private. Your files never leave your browser. No accounts, no limits.
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
-                  {['🔒 Secure', '⚡ Fast', '🆓 Free', '🌐 Offline'].map((t, i) => (
-                    <span key={i} style={{ padding: '4px 12px', borderRadius: 99, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: 11, fontWeight: 700, color: '#475569' }}>{t}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tools */}
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 12, color: '#6C63FF', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Tools</div>
-                {[['🔗', 'Merge PDFs'], ['✂️', 'Split PDF'], ['🗜️', 'Compress'], ['🔄', 'Convert to JPG'], ['✏️', 'Annotate'], ['🖊️', 'Sign PDF']].map(([ic, t], i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, color: '#334155', fontSize: 13, cursor: 'default' }}>
-                    <span style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(108,99,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{ic}</span>{t}
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 12, color: '#EC4899', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>More Tools</div>
-                {[['💧', 'Watermark'], ['🔃', 'Rotate'], ['📄', 'Page Numbers'], ['🔒', 'Protect'], ['🔓', 'Unlock'], ['🔍', 'Extract Text']].map(([ic, t], i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, color: '#334155', fontSize: 13, cursor: 'default' }}>
-                    <span style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(236,72,153,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{ic}</span>{t}
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 12, color: '#10B981', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Privacy</div>
-                {[['🔒', '256-bit SSL'], ['🚫', 'No file uploads'], ['👁️', 'No tracking'], ['🗑️', 'Nothing stored'], ['📱', 'Mobile friendly'], ['✈️', 'Works offline']].map(([ic, t], i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, color: '#334155', fontSize: 13 }}>
-                    <span style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{ic}</span>{t}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Bottom bar */}
-            <div style={{ paddingTop: 28, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 13, color: '#1E293B' }}>
-                © {yr} <span style={{ background: 'linear-gradient(90deg,#6C63FF,#EC4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 700 }}><a href="https://www.giritech.co.in">Giritech Enetrprises LLP</a></span>. All rights reserved. Made with ❤️
-              </div>
-              <div style={{ display: 'flex', gap: 24 }}>
-                {['Privacy Policy', 'Terms of Use', 'Contact Us'].map((t, i) => (
-                  <span key={i} style={{ fontSize: 13, color: '#1E293B', cursor: 'pointer', transition: 'color 0.2s', fontWeight: 500 }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#6C63FF'}
-                    onMouseLeave={e => e.currentTarget.style.color = '#1E293B'}>{t}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </footer>
-      );
-    }
-
-    /* ── MAIN APP ── */
-    function App() {
-      const [active, setActive] = useState(null);
-      const [search, setSearch] = useState('');
-      const filtered = TOOLS.filter(t => t.label.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase()));
-
-      return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-
-          {/* ─── NAV ─── */}
-          <nav>
-            <div onClick={() => { setActive(null); setSearch('') }} style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
-              <Logo size={40} />
-              <div>
-                <div style={{ fontFamily: 'Syne,Inter,sans-serif', fontWeight: 800, fontSize: 17, color: '#F1F5F9', letterSpacing: '-0.3px' }}>PDF Studio</div>
-                <div style={{ fontSize: 10, color: '#334155', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Free PDF Editor</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="pill" style={{ background: 'rgba(108,99,255,0.15)', color: '#A78BFA', border: '1px solid rgba(108,99,255,0.25)' }}>⚡ 12 Tools</span>
-              <span className="pill" style={{ background: 'rgba(16,185,129,0.12)', color: '#34D399', border: '1px solid rgba(16,185,129,0.25)' }}>🔒 Private</span>
-              <span className="pill" style={{ background: 'rgba(247,151,30,0.12)', color: '#FCD34D', border: '1px solid rgba(247,151,30,0.25)', display: 'flex' }}
-                style={{ ['@media(maxWidth:480px)']: { display: 'none' } }}>🆓 Free</span>
-            </div>
-          </nav>
-
-          <main style={{ flex: 1 }}>
-            {!active ? (
-              <>
-                {/* ─── HERO ─── */}
-                <section className="hero">
-                  <div className="hero-grid" />
-                  <Particles />
-                  {/* Orbs */}
-                  <div className="orb" style={{ width: 600, height: 600, background: 'radial-gradient(circle,rgba(108,99,255,0.18),transparent 65%)', top: '-10%', left: '-15%' }} />
-                  <div className="orb" style={{ width: 500, height: 500, background: 'radial-gradient(circle,rgba(236,72,153,0.14),transparent 65%)', top: '20%', right: '-10%' }} />
-                  <div className="orb" style={{ width: 400, height: 400, background: 'radial-gradient(circle,rgba(247,151,30,0.1),transparent 65%)', bottom: '0%', left: '30%' }} />
-                  <div className="scanline" />
-
-                  <div style={{ position: 'relative', zIndex: 2, maxWidth: 820, margin: '0 auto' }}>
-                    <div className="fade-up" style={{ marginBottom: 28 }}>
-                      <span className="pill" style={{ background: 'rgba(108,99,255,0.18)', color: '#A78BFA', border: '1px solid rgba(108,99,255,0.3)', fontSize: 13, padding: '7px 20px' }}>
-                        ✨ 12 Real PDF Tools · 100% Browser-Based · Zero Upload
-                      </span>
-                    </div>
-
-
-<a href="https://www.effectivecpmnetwork.com/zjuqshjw?key=b5baf0aa7e473413c0320d87d2076024" target="blank">get free more tools</a>
-                    <h1 className="fade-up" style={{ fontFamily: 'Syne,Inter,sans-serif', fontSize: 'clamp(38px,7vw,80px)', fontWeight: 800, lineHeight: 1.04, letterSpacing: '-3px', marginBottom: 24, animationDelay: '0.08s' }}>
-                      The Smartest Way to<span className="grad"> Edit Your PDFs</span>
-                    </h1>
-
-                    <p className="fade-up" style={{ fontSize: 'clamp(16px,2.2vw,20px)', color: '#475569', maxWidth: 580, margin: '0 auto 44px', lineHeight: 1.75, animationDelay: '0.16s' }}>
-                      Merge, split, compress, convert, watermark, sign & more —
-                      all right in your browser. <strong style={{ color: '#94A3B8' }}>Your files never leave your device.</strong>
-                    </p>
-
-                    {/* Search */}
-                    <div className="fade-up" style={{ position: 'relative', maxWidth: 500, margin: '0 auto 64px', animationDelay: '0.24s' }}>
-                      <div style={{ position: 'absolute', inset: -1, borderRadius: 62, background: 'linear-gradient(135deg,#6C63FF,#EC4899,#F7971E)', backgroundSize: '200%', animation: 'gradShift 4s ease infinite', zIndex: -1, filter: 'blur(8px)', opacity: 0.5 }} />
-                      <div style={{ position: 'relative', background: 'rgba(13,15,26,0.9)', borderRadius: 60, border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <span style={{ position: 'absolute', left: 22, top: '50%', transform: 'translateY(-50%)', fontSize: 18, color: '#475569', pointerEvents: 'none' }}>🔍</span>
-                        <input type="text" placeholder="Search tools…" value={search} onChange={e => setSearch(e.target.value)}
-                          style={{ width: '100%', padding: '17px 22px 17px 54px', borderRadius: 60, border: 'none', fontSize: 16, color: '#F1F5F9', outline: 'none', background: 'transparent', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} />
-                      </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="fade-up" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', animationDelay: '0.32s' }}>
-                      {[['12+', 'PDF Tools', '#6C63FF'], ['0 KB', 'Files Uploaded', '#10B981'], ['100%', 'Browser-Based', '#F7971E'], ['Free', 'Forever', '#EC4899']].map(([n, l, c], i) => (
-                        <div key={i} className="stat glass" style={{ minWidth: 130, animation: `countUp 0.5s ${0.4 + i * 0.08}s cubic-bezier(0.34,1.56,0.64,1) both` }}>
-                          <div style={{ fontFamily: 'Syne,Inter,sans-serif', fontSize: 26, fontWeight: 800, color: c, marginBottom: 4 }}>{n}</div>
-                          <div style={{ fontSize: 12, color: '#334155', fontWeight: 600, letterSpacing: 0.5 }}>{l}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Floating doc */}
-                    <div style={{ marginTop: 52, animation: 'float 5s ease-in-out infinite', display: 'inline-block' }}>
-                      <div style={{ width: 100, height: 130, borderRadius: 16, background: 'linear-gradient(135deg,rgba(108,99,255,0.2),rgba(236,72,153,0.1))', border: '1px solid rgba(108,99,255,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 20px 60px rgba(108,99,255,0.25),0 0 0 1px rgba(108,99,255,0.15)', backdropFilter: 'blur(20px)', margin: '0 auto' }}>
-                        <div style={{ fontSize: 36 }}>📄</div>
-                        <div style={{ width: 50, height: 3, borderRadius: 99, background: 'rgba(108,99,255,0.4)' }} />
-                        <div style={{ width: 38, height: 3, borderRadius: 99, background: 'rgba(236,72,153,0.3)' }} />
-                        <div style={{ width: 44, height: 3, borderRadius: 99, background: 'rgba(247,151,30,0.3)' }} />
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* ─── TOOLS GRID ─── */}
-                <section style={{ padding: '80px 20px 100px', maxWidth: 1160, margin: '0 auto' }}>
-                  <div style={{ textAlign: 'center', marginBottom: 60 }}>
-                    <span className="sec-label">Everything you need</span>
-                    <h2 style={{ fontFamily: 'Syne,Inter,sans-serif', fontSize: 'clamp(28px,4vw,48px)', fontWeight: 800, color: '#F1F5F9', letterSpacing: '-1.5px', lineHeight: 1.12, marginTop: 8 }}>
-                      Powerful tools,{' '}
-                      <span className="grad2">zero complexity</span>
-                    </h2>
-                    <p style={{ fontSize: 16, color: '#334155', marginTop: 12, maxWidth: 460, margin: '12px auto 0' }}>
-                      Pick a tool and drop your PDF — that's all it takes.
-                    </p>
-                  </div>
-
-                  {search ? (
-                    <>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(230px,1fr))', gap: 16 }}>
-                        {filtered.map(t => <ToolCard key={t.id} tool={t} onClick={() => setActive(t)} />)}
-                      </div>
-                      {!filtered.length && <div style={{ textAlign: 'center', padding: '60px 0', color: '#475569' }}>No tools found for "<strong style={{ color: '#E2E8F0' }}>{search}</strong>"</div>}
-                    </>
-                  ) : (
-                    CATS.map(cat => (
-                      <div key={cat} style={{ marginBottom: 52 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22 }}>
-                          <span style={{ fontSize: 18 }}>{CAT_ICONS[cat]}</span>
-                          <span className="sec-label" style={{ margin: 0 }}>{cat}</span>
-                          <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg,rgba(108,99,255,0.2),transparent)' }} />
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(230px,1fr))', gap: 16 }}>
-                          {TOOLS.filter(t => t.cat === cat).map(t => <ToolCard key={t.id} tool={t} onClick={() => setActive(t)} />)}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </section>
-
-
-
-
-                {/* ─── TRUST STRIP ─── */}
-                <section style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '44px 20px', background: 'rgba(255,255,255,0.01)' }}>
-                  <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
-                    {[['🔒', '256-bit SSL Encrypted'], ['🚫', 'Files Never Uploaded'], ['🗑️', 'Auto-Deleted Locally'], ['⚡', 'Instant Processing'], ['🌐', 'Any Browser'], ['🆓', 'Always Free'], ['📱', 'Mobile Friendly'], ['🔕', 'No Account Needed']].map(([ic, tx], i) => (
-                      <div key={i} className="badge">
-                        <span style={{ fontSize: 20 }}>{ic}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>{tx}</span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-
-              </>
-            ) : (
-              <div style={{ maxWidth: 1160, margin: '0 auto', padding: '104px 20px 80px' }}>
-                <ToolPanel tool={active} onBack={() => setActive(null)} />
-              </div>
-            )}
-          </main>
-
-          <Footer />
-
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+<script src="js/common.js"></script>
+<script>
+  /* disable right click already handled in common.js; just set year handled too */
+</script>
 </body>
-
 </html>
